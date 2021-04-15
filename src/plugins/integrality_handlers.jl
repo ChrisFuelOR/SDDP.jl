@@ -780,7 +780,6 @@ function get_dual_variables(
 
     elseif integrality_handler.algoParams.cut_type == :L
         ########################################################################
-        # TODO: Call initialize_duals method
         TimerOutputs.@timeit NCNBD_TIMER "dual_initialization" begin
             dual_vars = initialize_duals(node, integrality_handler.algoParams.init_regime)
         end
@@ -874,9 +873,8 @@ function _kelley(
 
     # LOGGING OF LAGRANGIAN DUAL
     ############################################################################
-    # TODO
-    lag_log_file_handle = open("C:/Users/cg4102/Documents/julia_logs/Lagrange.log", "a")
-    print_helper(print_lagrange_header, lag_log_file_handle)
+    #lag_log_file_handle = open("C:/Users/cg4102/Documents/julia_logs/Lagrange.log", "a")
+    #print_helper(print_lagrange_header, lag_log_file_handle)
 
     # SET-UP APPROXIMATION MODEL
     ############################################################################
@@ -1100,10 +1098,6 @@ function initialize_duals(
         # Create LP Relaxation
         undo_relax = JuMP.relax_integrality(subproblem);
 
-        # Define appropriate solver
-        # TODO: Adapt solver
-        set_optimizer(subproblem, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>"Gurobi", "optcr"=>0.0))
-
         # Solve LP Relaxation
         JuMP.optimize!(subproblem)
 
@@ -1133,8 +1127,6 @@ function initialize_duals(
 
         # Undo relaxation
         undo_relax()
-
-    # TODO: Reset solvers
 
     return dual_vars_initial
 end
@@ -1170,9 +1162,8 @@ function _bundle_level(
 
     # LOGGING OF LAGRANGIAN DUAL
     ############################################################################
-    # TODO
-    lag_log_file_handle = open("C:/Users/cg4102/Documents/julia_logs/Lagrange.log", "a")
-    print_helper(print_lagrange_header, lag_log_file_handle)
+    #lag_log_file_handle = open("C:/Users/cg4102/Documents/julia_logs/Lagrange.log", "a")
+    #print_helper(print_lagrange_header, lag_log_file_handle)
 
     # SET-UP APPROXIMATION MODEL
     ############################################################################
@@ -1189,17 +1180,21 @@ function _bundle_level(
     # Approximation of Lagrangian dual as a function of the multipliers
     approx_model = JuMP.Model(integrality_handler.optimizer)
 
-    # TODO: Define different solver
-    #if appliedSolvers.Lagrange == "CPLEX"
-    #    set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.Lagrange, "optcr"=>0.0, "numericalemphasis"=>0))
-    #    set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.Lagrange, "optcr"=>0.0, "numericalemphasis"=>0))
-    #elseif appliedSolvers.Lagrange == "Gurobi"
-    #    set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.Lagrange, "optcr"=>0.0, "NumericFocus"=>1))
-    #    set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.Lagrange, "optcr"=>0.0, "numericalemphasis"=>0))
-    #else
-    #    set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.Lagrange, "optcr"=>0.0))
-    #    set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.Lagrange, "optcr"=>0.0, "numericalemphasis"=>0))
-    #end
+    if integrality_handler.optimizer == "GAMS"
+        if algoParams.solver == "CPLEX"
+            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
+            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
+        elseif algoParams.solver == "Gurobi"
+            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "NumericFocus"=>1))
+            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
+        else
+            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0))
+            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0)
+        end
+    elseif
+        set_optimizer(approx_model, optimizer_with_attributes(integrality_handler.optimizer, "optcr"=>0.0)
+        set_optimizer(model, optimizer_with_attributes(integrality_handler.optimizer, "optcr"=>0.0)
+    end
 
     # Define Lagrangian dual multipliers
     @variables approx_model begin
@@ -1255,7 +1250,7 @@ function _bundle_level(
             JuMP.@constraint(
                 approx_model,
                 θ >= f_actual + LinearAlgebra.dot(subgradients, x - dual_vars)
-                # TODO: Reset upper bound to inf?
+                # Reset upper bound to inf?
             )
             if f_actual <= best_actual
                 best_actual = f_actual
@@ -1265,7 +1260,7 @@ function _bundle_level(
             JuMP.@constraint(
                 approx_model,
                 θ <= f_actual + LinearAlgebra.dot(subgradients, x - dual_vars)
-                # TODO: Reset lower boumd to -inf?
+                # Reset lower boumd to -inf?
             )
             if f_actual >= best_actual
                 # bestmult is not simply getvalue.(x), since approx_model may just haven gotten lucky
@@ -1342,11 +1337,11 @@ function _bundle_level(
         ########################################################################
         if dualsense == :Min
             level = f_approx + gap * level_factor
-            #TODO: + atol/10.0 for numerical issues?
+            #+ atol/10.0 for numerical issues?
             JuMP.setupperbound(θ, level)
         else
             level = f_approx - gap * level_factor
-            #TODO: - atol/10.0 for numerical issues?
+            #- atol/10.0 for numerical issues?
             JuMP.setlowerbound(θ, level)
         end
 
@@ -1361,8 +1356,7 @@ function _bundle_level(
         dual_vars .= value.(x)
 
         # Logging
-        # TODO
-        print_helper(print_lag_iteration, lag_log_file_handle, iter, f_approx, best_actual, f_actual)
+        # print_helper(print_lag_iteration, lag_log_file_handle, iter, f_approx, best_actual, f_actual)
 
     end
 
@@ -1392,21 +1386,24 @@ function _getStrengtheningInformation(
 
     # LOGGING OF LAGRANGIAN DUAL
     ############################################################################
-    # TODO
-    lag_log_file_handle = open("C:/Users/cg4102/Documents/julia_logs/Lagrange.log", "a")
-    print_helper(print_lagrange_header, lag_log_file_handle)
+    #lag_log_file_handle = open("C:/Users/cg4102/Documents/julia_logs/Lagrange.log", "a")
+    #print_helper(print_lagrange_header, lag_log_file_handle)
 
-    # TODO: Define different solver
-    #if appliedSolvers.Lagrange == "CPLEX"
-    #    set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.Lagrange, "optcr"=>0.0, "numericalemphasis"=>0))
-    #    set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.Lagrange, "optcr"=>0.0, "numericalemphasis"=>0))
-    #elseif appliedSolvers.Lagrange == "Gurobi"
-    #    set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.Lagrange, "optcr"=>0.0, "NumericFocus"=>1))
-    #    set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.Lagrange, "optcr"=>0.0, "numericalemphasis"=>0))
-    #else
-    #    set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.Lagrange, "optcr"=>0.0))
-    #    set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.Lagrange, "optcr"=>0.0, "numericalemphasis"=>0))
-    #end
+    if integrality_handler.optimizer == "GAMS"
+        if algoParams.solver == "CPLEX"
+            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
+            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
+        elseif algoParams.solver == "Gurobi"
+            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "NumericFocus"=>1))
+            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
+        else
+            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0))
+            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0)
+        end
+    elseif
+        set_optimizer(approx_model, optimizer_with_attributes(integrality_handler.optimizer, "optcr"=>0.0)
+        set_optimizer(model, optimizer_with_attributes(integrality_handler.optimizer, "optcr"=>0.0)
+    end
 
     # SOLVE LAGRANGIAN RELAXATION FOR GIVEN DUAL_VARS
     ########################################################################
@@ -1414,7 +1411,7 @@ function _getStrengtheningInformation(
     best_actual = _solve_Lagrangian_relaxation!(subgradients, node, dual_vars, integrality_handler.slacks, :no)
 
     # Logging
-    print_helper(print_lag_iteration, lag_log_file_handle, iter, f_approx, best_actual, f_actual)
+    # print_helper(print_lag_iteration, lag_log_file_handle, iter, f_approx, best_actual, f_actual)
 
     return best_actual
 end

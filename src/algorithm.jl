@@ -143,6 +143,8 @@ end
 # contained in state.
 function set_incoming_state(node::Node, state::Dict{Symbol,Float64})
     for (state_name, value) in state
+        node.ext[:lower_bounds][state_name] = JuMP.lower_bound(state.out)
+        node.ext[:upper_bounds][state_name] = JuMP.upper_bound(state.out)
         JuMP.fix(node.states[state_name].in, value)
     end
     return
@@ -373,10 +375,19 @@ function solve_subproblem(
     # the dual on the fixed constraint associated with each incoming state
     # variable. If require_duals=false, return an empty dictionary for
     # type-stability.
-    dual_values = if require_duals
-        get_dual_variables(node, node.integrality_handler)
+    if require_duals
+        TimerOutputs.@timeit NCNBD_TIMER "solve_lagrange" begin
+            lagrangian_results = get_dual_variables(node, node.integrality_handler)
+        end
+        dual_values = lagrangian_results.dual_values
+        objective = lagrangian_results.intercept
+        iterations = lagrangian_results.iterations
+        lag_status = lagrangian_results.lag_status
     else
-        Dict{Symbol,Float64}()
+        dual_values = Dict{Symbol,Float64}()
+        objective = objective
+        iterations = 0
+        lag_status = :none
     end
 
     if node.post_optimize_hook !== nothing
@@ -388,6 +399,8 @@ function solve_subproblem(
         duals = dual_values,
         objective = objective,
         stage_objective = stage_objective,
+        iterations = iterations,
+        lag_status = lag_status,
     )
 end
 
@@ -532,6 +545,10 @@ function backward_pass(
                 items.objectives,
             )
             push!(cuts[node_index], new_cuts)
+            #TODO: Has to be adapted for stochastic case
+            push!(model.ext[:lag_iterations], sum(items.lag_iterations))
+            push!(model.ext[:lag_status], items.lag_status[1])
+
             if options.refine_at_similar_nodes
                 # Refine the bellman function at other nodes with the same
                 # children, e.g., in the same stage of a Markovian policy graph.
@@ -571,6 +588,8 @@ struct BackwardPassItems{T,U}
     probability::Vector{Float64}
     objectives::Vector{Float64}
     belief::Vector{Float64}
+    lag_iterations::Vector{Int}
+    lag_status::Vector{Symbol}
     function BackwardPassItems(T, U)
         return new{T,U}(
             Dict{Tuple{T,Any},Int}(),
@@ -580,6 +599,8 @@ struct BackwardPassItems{T,U}
             Float64[],
             Float64[],
             Float64[],
+            Int[],
+            Symbol[],
         )
     end
 end
@@ -615,6 +636,8 @@ function solve_all_children(
                 push!(items.probability, items.probability[sol_index])
                 push!(items.objectives, items.objectives[sol_index])
                 push!(items.belief, belief)
+                push!(items.lag_iterations, items.lag_iterations[sol_index])
+                push!(items.lag_status, items.lag_status[sol_index])
             else
                 # Update belief state, etc.
                 if belief_state !== nothing
@@ -649,6 +672,8 @@ function solve_all_children(
                 push!(items.probability, child.probability * noise.probability)
                 push!(items.objectives, subproblem_results.objective)
                 push!(items.belief, belief)
+                push!(items.lag_iterations, subproblem_results.iterations)
+                push!(items.lag_status, subproblem_results.lag_status)
                 items.cached_solutions[(child.term, noise.term)] = length(items.duals)
             end
         end
@@ -878,6 +903,7 @@ function train(
             model,
             parallel_scheme,
         )
+        print_helper(print_parameters, log_file_handle, iteration_limit, time_limit, stopping_rules, model)
     end
 
     if run_numerical_stability_report
@@ -920,6 +946,25 @@ function train(
         for oracle in node.bellman_function.local_thetas
             oracle.cut_oracle.deletion_minimum = cut_deletion_minimum
         end
+
+        # add lower and upper bound storage for nodes
+        node.ext[:lower_bounds] = Dict{Symbol,Float64}()
+        node.ext[:upper_bounds] = Dict{Symbol,Float64}()
+
+        # set-up solvers
+        if node.optimizer == "GAMS"
+            solver = node.subproblem.ext[:sddp_policy_graph].ext[:solver]
+            if solver == "CPLEX"
+                set_optimizer(node.subproblem, optimizer_with_attributes(node.optimizer, "Solver"=>solver, "optcr"=>0.0, "numericalemphasis"=>0))
+            elseif solver == "Gurobi"
+                set_optimizer(node.subproblem, optimizer_with_attributes(node.optimizer, "Solver"=>solver, "optcr"=>0.0, "numericalemphasis"=>0))
+            else
+                set_optimizer(node.subproblem, optimizer_with_attributes(node.optimizer, "Solver"=>solver, "optcr"=>0.0)
+            end
+        elseif
+            set_optimizer(node.subproblem, optimizer_with_attributes(node.optimizer, "optcr"=>0.0)
+        end
+
     end
 
     # Perform relaxations required by integrality_handler

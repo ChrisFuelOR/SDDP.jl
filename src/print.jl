@@ -88,7 +88,7 @@ end
 function print_iteration_header(io)
     println(
         io,
-        " Iteration    Simulation       Bound         Time (s)    Proc. ID   # Solves",
+        " Iteration    Simulation       Bound         Time (s)    Proc. ID   # Solves      Lag iterations & status",
     )
 end
 
@@ -102,7 +102,12 @@ function print_iteration(io, log::Log)
     print(io, "  ", print_value(log.time))
     print(io, "  ", print_value(log.pid))
     print(io, "  ", print_value(log.total_solves))
+    print(io, "     ")
+    print(io, log.lag_iterations)
+    print(io, log.lag_status)
+
     println(io)
+    flush(io)
 end
 
 function print_footer(io, training_results)
@@ -111,6 +116,63 @@ function print_footer(io, training_results)
         io,
         "------------------------------------------------------------------------------",
     )
+end
+
+function print_parameters(
+    io,
+    iteration_limit::Union{Int,Nothing},
+    time_limit::Union{Real,Nothing},
+    stopping_rules::AbstractStoppingRule[],
+    model::PolicyGraph,
+    )
+
+    # Printing the time
+    println(io, Dates.now())
+
+    # Printint the file name
+    print(io, "calling ")
+    print(io, @__DIR__)
+    println(io)
+    println(io)
+
+    handler = model.nodes[1].integrality_handler
+    algoParams = handler.algoParams
+
+    # Printing the parameters used
+    #println(io, Printf.@sprintf("SDDP optimality tolerance: %1.4e", ???))
+    println(io, "iteration limit: ", iteration_limit)
+    println(io, "time limit: ", time_limit)
+    println(io, "optimizer: ", model.optimizer)
+    println(io, "solver: ", model.ext[:solver])
+    println(io, "--------------------------------------------------------")
+    println(io, "stopping rules: ", stopping_rules)
+    println(io, "--------------------------------------------------------")
+    println(io, "Integrality handler: ", handler)
+    if handler == :SDDiP_bin
+        println(io, "Binary precision: ", algoParams.binaryPrecision)
+    end
+    println(io, "--------------------------------------------------------")
+    println(io, "Lagrangian iteration limit: ", handler.iteration_limit)
+    println(io, "Lagrangian optimizer: ", handler.optimizer)
+    println(io, "Lagrangian solver: ", algoParams.solver)
+    println(io, "Lagrangian atol:", handler.atol)
+    println(io, "Lagrangian rtol:", handler.rtol)
+    println(io, "--------------------------------------------------------")
+    println(io, "Cut type: " algoParams.cut_type)
+    println(io, "--------------------------------------------------------")
+    if algoParams.cut_type == :L
+        println(io, "Lagrangian solution method: " algoParams.sol_method)
+        println(io, "Lagrangian status regime: " algoParams.status_regime)
+        println(io, "Lagrangian bound regime: " algoParams.bound_regime)
+        println(io, "Lagrangian initialization regime: " algoParams.init_regime)
+
+        if algoParams.sol_method == :bundle_level
+            print(io, "Level parameter: ")
+            println(io, algoParams.bundle_parameters.level_factor)
+        end
+    end
+
+    flush(io)
 end
 
 ###

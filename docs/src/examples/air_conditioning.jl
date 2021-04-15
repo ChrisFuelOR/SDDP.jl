@@ -18,7 +18,7 @@
 
 # The known optimal solution is \\\$62,500
 
-using SDDP, GLPK, Test
+using SDDP, GLPK, Test, Infiltrator
 
 function air_conditioning_model(integrality_handler)
     model = SDDP.LinearPolicyGraph(
@@ -39,7 +39,8 @@ function air_conditioning_model(integrality_handler)
         )
         @stageobjective(sp, 100 * production + 300 * overtime + 50 * stored_production.out)
     end
-    SDDP.train(model, iteration_limit = 20, log_frequency = 10)
+    @infiltrate
+    SDDP.train(model, iteration_limit = 20, log_frequency = 1)
     @test SDDP.calculate_bound(model) ≈ 62_500.0
     return
 end

@@ -455,6 +455,12 @@ cut_type:
 bundle_parameters:
 --------------------------------------------------------------------------------
 - parameters specific to the level bundle method
+
+solver:
+--------------------------------------------------------------------------------
+- defines which solver should be used to solve the subproblems
+- note that in integrality_handler already an optimizer is defined;
+however, if this one is GAMS, then a specific solver has to be defined
 """
 
 mutable struct AlgoParams
@@ -463,7 +469,9 @@ mutable struct AlgoParams
     bound_regime::Symbol
     init_regime::Symbol
     cut_type::Symbol
+    solver::Any
     bundle_parameters::Union{Nothing, BundleParams}
+    binaryPrecision::Union{Nothing, Float64}
 end
 
 # =========================== SDDiP_bin ====================================== #
@@ -711,9 +719,8 @@ function relax(node::Node, ::SDDiP_con)
         integrality_handler.slacks[i] = state.in - integrality_handler.old_rhs[i]
         JuMP.unfix(state.in)
 
-        # TODO: Adapt this to original lower and upper bounds of the states
-        JuMP.set_lower_bound(state.in, 0)
-        JuMP.set_upper_bound(state.in, 1)
+        JuMP.set_lower_bound(state.in, node.ext[:lower_bounds][name])
+        JuMP.set_upper_bound(state.in, node.ext[:upper_bounds][name])
     end
 end
 
@@ -818,6 +825,20 @@ function get_dual_variables(
         dual_values[name] = -dual_vars[i]
     end
 
+    # reset solver
+    if node.optimizer == "GAMS"
+        solver = node.subproblem.ext[:sddp_policy_graph].ext[:solver]
+        if solver == "CPLEX"
+            set_optimizer(node.subproblem, optimizer_with_attributes(node.optimizer, "Solver"=>solver, "optcr"=>0.0, "numericalemphasis"=>0))
+        elseif solver == "Gurobi"
+            set_optimizer(node.subproblem, optimizer_with_attributes(node.optimizer, "Solver"=>solver, "optcr"=>0.0, "numericalemphasis"=>0))
+        else
+            set_optimizer(node.subproblem, optimizer_with_attributes(node.optimizer, "Solver"=>solver, "optcr"=>0.0)
+        end
+    elseif
+        set_optimizer(node.subproblem, optimizer_with_attributes(node.optimizer, "optcr"=>0.0)
+    end
+
     return (
         dual_values=dual_values,
         intercept=lag_obj,
@@ -872,17 +893,21 @@ function _kelley(
     # Approximation of Lagrangian dual as a function of the multipliers
     approx_model = JuMP.Model(integrality_handler.optimizer)
 
-    # TODO: Define different solver
-    #if appliedSolvers.Lagrange == "CPLEX"
-    #    set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.Lagrange, "optcr"=>0.0, "numericalemphasis"=>0))
-    #    set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.Lagrange, "optcr"=>0.0, "numericalemphasis"=>0))
-    #elseif appliedSolvers.Lagrange == "Gurobi"
-    #    set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.Lagrange, "optcr"=>0.0, "NumericFocus"=>1))
-    #    set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.Lagrange, "optcr"=>0.0, "numericalemphasis"=>0))
-    #else
-    #    set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.Lagrange, "optcr"=>0.0))
-    #    set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.Lagrange, "optcr"=>0.0, "numericalemphasis"=>0))
-    #end
+    if integrality_handler.optimizer == "GAMS"
+        if algoParams.solver == "CPLEX"
+            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
+            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
+        elseif algoParams.solver == "Gurobi"
+            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "NumericFocus"=>1))
+            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
+        else
+            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0))
+            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0)
+        end
+    elseif
+        set_optimizer(approx_model, optimizer_with_attributes(integrality_handler.optimizer, "optcr"=>0.0)
+        set_optimizer(model, optimizer_with_attributes(integrality_handler.optimizer, "optcr"=>0.0)
+    end
 
     # Objective estimate and Lagrangian duals
     @variables approx_model begin
@@ -1000,14 +1025,6 @@ function _kelley(
                 #prepare_state_fixing!(node, state_comp)
                 JuMP.fix(state.in, integrality_handler.old_rhs[i], force = true)
             end
-
-            #if appliedSolvers.MILP == "CPLEX"
-            #    set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.MILP, "optcr"=>0.0, "numericalemphasis"=>0))
-            #elseif appliedSolvers.MILP == "Gurobi"
-            #    set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.MILP, "optcr"=>0.0, "NumericFocus"=>1))
-            #else
-            #    set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>appliedSolvers.MILP, "optcr"=>0.0))
-            #end
 
             return (lag_obj = best_actual, iterations = iter, lag_status = lag_status)
         end

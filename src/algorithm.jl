@@ -890,6 +890,9 @@ function train(
     parallel_scheme::AbstractParallelScheme = Serial(),
     forward_pass::AbstractForwardPass = DefaultForwardPass(),
 )
+    @infiltrate
+    print("Fuck you")
+
     # Reset the TimerOutput.
     TimerOutputs.reset_timer!(SDDP_TIMER)
     log_file_handle = open(log_file, "a")

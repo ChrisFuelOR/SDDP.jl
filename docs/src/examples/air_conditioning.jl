@@ -40,9 +40,6 @@ function air_conditioning_model(integrality_handler)
         @stageobjective(sp, 100 * production + 300 * overtime + 50 * stored_production.out)
     end
 
-    print("blubb")
-    @infiltrate
-
     SDDP.train(model, iteration_limit = 20, log_frequency = 1)
     @test SDDP.calculate_bound(model) ≈ 62_500.0
     return

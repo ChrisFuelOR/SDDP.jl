@@ -253,6 +253,8 @@ function setup_state(
 end
 
 function get_dual_variables(node::Node, integrality_handler::SDDiP)
+    @infiltrate
+
     dual_values = Dict{Symbol,Float64}()
     dual_vars = zeros(length(node.states))
     solver_obj = JuMP.objective_value(node.subproblem)

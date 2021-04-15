@@ -143,8 +143,13 @@ end
 # contained in state.
 function set_incoming_state(node::Node, state::Dict{Symbol,Float64})
     for (state_name, value) in state
-        node.ext[:lower_bounds][state_name] = JuMP.lower_bound(state.out)
-        node.ext[:upper_bounds][state_name] = JuMP.upper_bound(state.out)
+
+        if has_lower_bound(node.states[state_name].out)
+            node.ext[:lower_bounds][state_name] = JuMP.lower_bound(node.states[state_name].out)
+        end
+        if has_upper_bound(node.states[state_name].out)
+            node.ext[:upper_bounds][state_name] = JuMP.upper_bound(node.states[state_name].out)
+        end
         JuMP.fix(node.states[state_name].in, value)
     end
     return
@@ -375,8 +380,15 @@ function solve_subproblem(
     # the dual on the fixed constraint associated with each incoming state
     # variable. If require_duals=false, return an empty dictionary for
     # type-stability.
-    if require_duals
-        TimerOutputs.@timeit NCNBD_TIMER "solve_lagrange" begin
+    if require_duals && (typeof(node.integrality_handler) == SDDP.SDDiP || typeof(node.integrality_handler) == SDDP.ContinuousRelaxation)
+        TimerOutputs.@timeit SDDP_TIMER "solve_lagrange" begin
+            dual_values = get_dual_variables(node, node.integrality_handler)
+        end
+        objective = objective
+        iterations = 0
+        lag_status = :none
+    elseif require_duals && (typeof(node.integrality_handler) == SDDP.SDDiP_bin || typeof(node.integrality_handler) == SDDP.SDDiP_con)
+        TimerOutputs.@timeit SDDP_TIMER "solve_lagrange" begin
             lagrangian_results = get_dual_variables(node, node.integrality_handler)
         end
         dual_values = lagrangian_results.dual_values
@@ -474,6 +486,9 @@ function backward_pass(
 ) where {T,NoiseType,N}
     # TODO(odow): improve storage type.
     cuts = Dict{T,Vector{Any}}(index => Any[] for index in keys(model.nodes))
+    model.ext[:lag_iterations] = Int[]
+    model.ext[:lag_status] = Symbol[]
+
     for index = length(scenario_path):-1:1
         outgoing_state = sampled_states[index]
         objective_state = get(objective_states, index, nothing)
@@ -788,6 +803,8 @@ function iteration(model::PolicyGraph{T}, options::Options) where {T}
             time() - options.start_time,
             Distributed.myid(),
             model.ext[:total_solves],
+            model.ext[:lag_iterations],
+            model.ext[:lag_status],
         ),
     )
     has_converged, status = convergence_test(model, options.log, options.stopping_rules)
@@ -890,8 +907,6 @@ function train(
     parallel_scheme::AbstractParallelScheme = Serial(),
     forward_pass::AbstractForwardPass = DefaultForwardPass(),
 )
-    @infiltrate
-    print("Fuck you")
 
     # Reset the TimerOutput.
     TimerOutputs.reset_timer!(SDDP_TIMER)
@@ -906,7 +921,10 @@ function train(
             model,
             parallel_scheme,
         )
-        print_helper(print_parameters, log_file_handle, iteration_limit, time_limit, stopping_rules, model)
+
+        if typeof(model.nodes[1].integrality_handler) == SDDP.SDDiP_bin || typeof(model.nodes[1].integrality_handler) == SDDP.SDDiP_con
+            print_helper(print_parameters, log_file_handle, iteration_limit, time_limit, model)
+        end
     end
 
     if run_numerical_stability_report
@@ -962,10 +980,10 @@ function train(
             elseif solver == "Gurobi"
                 set_optimizer(node.subproblem, optimizer_with_attributes(node.optimizer, "Solver"=>solver, "optcr"=>0.0, "numericalemphasis"=>0))
             else
-                set_optimizer(node.subproblem, optimizer_with_attributes(node.optimizer, "Solver"=>solver, "optcr"=>0.0)
+                set_optimizer(node.subproblem, optimizer_with_attributes(node.optimizer, "Solver"=>solver, "optcr"=>0.0))
             end
-        elseif
-            set_optimizer(node.subproblem, optimizer_with_attributes(node.optimizer, "optcr"=>0.0)
+        else
+            set_optimizer(node.subproblem, node.optimizer)
         end
 
     end

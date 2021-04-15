@@ -122,7 +122,6 @@ function print_parameters(
     io,
     iteration_limit::Union{Int,Nothing},
     time_limit::Union{Real,Nothing},
-    stopping_rules::AbstractStoppingRule[],
     model::PolicyGraph,
     )
 
@@ -142,13 +141,13 @@ function print_parameters(
     #println(io, Printf.@sprintf("SDDP optimality tolerance: %1.4e", ???))
     println(io, "iteration limit: ", iteration_limit)
     println(io, "time limit: ", time_limit)
-    println(io, "optimizer: ", model.optimizer)
+    println(io, "optimizer: ", model.nodes[1].optimizer)
     println(io, "solver: ", model.ext[:solver])
     println(io, "--------------------------------------------------------")
-    println(io, "stopping rules: ", stopping_rules)
-    println(io, "--------------------------------------------------------")
-    println(io, "Integrality handler: ", handler)
-    if handler == :SDDiP_bin
+    #println(io, "stopping rules: ", stopping_rules)
+    #println(io, "--------------------------------------------------------")
+    println(io, "Integrality handler: ", typeof(handler))
+    if typeof(handler) == :SDDiP_bin
         println(io, "Binary precision: ", algoParams.binaryPrecision)
     end
     println(io, "--------------------------------------------------------")
@@ -158,13 +157,13 @@ function print_parameters(
     println(io, "Lagrangian atol:", handler.atol)
     println(io, "Lagrangian rtol:", handler.rtol)
     println(io, "--------------------------------------------------------")
-    println(io, "Cut type: " algoParams.cut_type)
+    println(io, "Cut type: ", algoParams.cut_type)
     println(io, "--------------------------------------------------------")
     if algoParams.cut_type == :L
-        println(io, "Lagrangian solution method: " algoParams.sol_method)
-        println(io, "Lagrangian status regime: " algoParams.status_regime)
-        println(io, "Lagrangian bound regime: " algoParams.bound_regime)
-        println(io, "Lagrangian initialization regime: " algoParams.init_regime)
+        println(io, "Lagrangian solution method: ", algoParams.sol_method)
+        println(io, "Lagrangian status regime: ", algoParams.status_regime)
+        println(io, "Lagrangian bound regime: ", algoParams.bound_regime)
+        println(io, "Lagrangian initialization regime: ", algoParams.init_regime)
 
         if algoParams.sol_method == :bundle_level
             print(io, "Level parameter: ")

@@ -1,0 +1,186 @@
+{
+  "name": "MathOptFormat Model",
+  "version": {
+    "major": 0,
+    "minor": 5
+  },
+  "variables": [
+    {
+      "name": "demand"
+    },
+    {
+      "name": "stored_production_in"
+    },
+    {
+      "name": "stored_production_out"
+    },
+    {
+      "name": "production"
+    },
+    {
+      "name": "overtime"
+    },
+    {
+      "name": "x6"
+    }
+  ],
+  "objective": {
+    "sense": "min",
+    "function": {
+      "type": "ScalarAffineFunction",
+      "terms": [
+        {
+          "coefficient": 100.0,
+          "variable": "production"
+        },
+        {
+          "coefficient": 300.0,
+          "variable": "overtime"
+        },
+        {
+          "coefficient": 50.0,
+          "variable": "stored_production_out"
+        },
+        {
+          "coefficient": 1.0,
+          "variable": "x6"
+        }
+      ],
+      "constant": 0.0
+    }
+  },
+  "constraints": [
+    {
+      "name": "c1",
+      "function": {
+        "type": "ScalarAffineFunction",
+        "terms": [
+          {
+            "coefficient": 1.0,
+            "variable": "demand"
+          },
+          {
+            "coefficient": -1.0,
+            "variable": "stored_production_in"
+          },
+          {
+            "coefficient": 1.0,
+            "variable": "stored_production_out"
+          },
+          {
+            "coefficient": -1.0,
+            "variable": "production"
+          },
+          {
+            "coefficient": -1.0,
+            "variable": "overtime"
+          }
+        ],
+        "constant": 0.0
+      },
+      "set": {
+        "type": "EqualTo",
+        "value": 0.0
+      }
+    },
+    {
+      "name": "c1_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "demand"
+      },
+      "set": {
+        "type": "EqualTo",
+        "value": 100.0
+      }
+    },
+    {
+      "name": "c2",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "stored_production_in"
+      },
+      "set": {
+        "type": "GreaterThan",
+        "lower": 0.0
+      }
+    },
+    {
+      "name": "c3",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "stored_production_out"
+      },
+      "set": {
+        "type": "GreaterThan",
+        "lower": 0.0
+      }
+    },
+    {
+      "name": "c4",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "production"
+      },
+      "set": {
+        "type": "GreaterThan",
+        "lower": 0.0
+      }
+    },
+    {
+      "name": "c5",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "overtime"
+      },
+      "set": {
+        "type": "GreaterThan",
+        "lower": 0.0
+      }
+    },
+    {
+      "name": "c6",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "x6"
+      },
+      "set": {
+        "type": "GreaterThan",
+        "lower": 0.0
+      }
+    },
+    {
+      "name": "c3_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "stored_production_out"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 100.0
+      }
+    },
+    {
+      "name": "c4_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "production"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 200.0
+      }
+    },
+    {
+      "name": "c6_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "x6"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 0.0
+      }
+    }
+  ]
+}

@@ -407,6 +407,8 @@ struct Log
     time::Float64
     pid::Int
     total_solves::Int
+    lag_iterations::Vector{Int}
+    lag_status::Vector{Symbol}
 end
 
 struct TrainingResults

@@ -22,6 +22,11 @@ import TimerOutputs
 # Change this back to `import RecipesBase` once the fix is tagged.
 using RecipesBase
 
+using Infiltrator
+using Printf
+using Dates
+import GAMS
+
 export @stageobjective
 
 # Modelling interface.

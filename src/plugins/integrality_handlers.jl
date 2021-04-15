@@ -152,14 +152,12 @@ mutable struct SDDiP <: AbstractIntegralityHandler
     slacks::Vector{GenericAffExpr{Float64,VariableRef}}
     atol::Float64
     rtol::Float64
-    algoParams::AlgoParams
 
-    function SDDiP(; iteration_limit::Int = 100, atol::Float64 = 1e-8, rtol::Float64 = 1e-8, algoParams::AlgoParams)
+    function SDDiP(; iteration_limit::Int = 100, atol::Float64 = 1e-8, rtol::Float64 = 1e-8)
         integrality_handler = new()
         integrality_handler.iteration_limit = iteration_limit
         integrality_handler.atol = atol
         integrality_handler.rtol = rtol
-        integrality_handler.algoParams = algoParams
         return integrality_handler
     end
 end
@@ -253,7 +251,6 @@ function setup_state(
 end
 
 function get_dual_variables(node::Node, integrality_handler::SDDiP)
-    @infiltrate
 
     dual_values = Dict{Symbol,Float64}()
     dual_vars = zeros(length(node.states))
@@ -616,6 +613,8 @@ Relax copy constraints
 """
 function relax(node::Node, ::SDDiP_bin)
 
+    integrality_handler = node.integrality_handler
+
     for (i, (name, state)) in enumerate(node.states)
         integrality_handler.old_rhs[i] = JuMP.fix_value(state.in)
         integrality_handler.slacks[i] = state.in - integrality_handler.old_rhs[i]
@@ -716,6 +715,8 @@ Relax copy constraints
 """
 function relax(node::Node, ::SDDiP_con)
 
+    integrality_handler = node.integrality_handler
+
     for (i, (name, state)) in enumerate(node.states)
         integrality_handler.old_rhs[i] = JuMP.fix_value(state.in)
         integrality_handler.slacks[i] = state.in - integrality_handler.old_rhs[i]
@@ -756,11 +757,11 @@ function get_dual_variables(
     ############################################################################
     @assert integrality_handler.algoParams.cut_type in [:B, :SB, :L]
 
-    if integality_handler.algoParams.cut_type == :B
+    if integrality_handler.algoParams.cut_type == :B
         ########################################################################
         # Create Benders cut by solving LP relaxation
 
-        TimerOutputs.@timeit NCNBD_TIMER "dual_initialization" begin
+        TimerOutputs.@timeit SDDP_TIMER "dual_initialization" begin
             dual_vars = initialize_duals(node, :LP)
         end
         lag_obj = JuMP.objective_value(node.subproblem)
@@ -771,7 +772,7 @@ function get_dual_variables(
         #Create strengthened Benders cut
 
         # Initialize dual variables by solving LP dual
-        TimerOutputs.@timeit NCNBD_TIMER "dual_initialization" begin
+        TimerOutputs.@timeit SDDP_TIMER "dual_initialization" begin
             dual_vars = initialize_duals(node, :LP)
         end
 
@@ -782,7 +783,7 @@ function get_dual_variables(
 
     elseif integrality_handler.algoParams.cut_type == :L
         ########################################################################
-        TimerOutputs.@timeit NCNBD_TIMER "dual_initialization" begin
+        TimerOutputs.@timeit SDDP_TIMER "dual_initialization" begin
             dual_vars = initialize_duals(node, integrality_handler.algoParams.init_regime)
         end
 
@@ -819,6 +820,7 @@ function get_dual_variables(
             SDDP.write_subproblem_to_file(node, "subproblem.mof.json", throw_error = false)
             rethrow(e)
         end
+    end
 
     # SET DUAL VARIABLES AND STATES CORRECTLY FOR RETURN
     ############################################################################
@@ -834,10 +836,10 @@ function get_dual_variables(
         elseif solver == "Gurobi"
             set_optimizer(node.subproblem, optimizer_with_attributes(node.optimizer, "Solver"=>solver, "optcr"=>0.0, "numericalemphasis"=>0))
         else
-            set_optimizer(node.subproblem, optimizer_with_attributes(node.optimizer, "Solver"=>solver, "optcr"=>0.0)
+            set_optimizer(node.subproblem, optimizer_with_attributes(node.optimizer, "Solver"=>solver, "optcr"=>0.0))
         end
-    elseif
-        set_optimizer(node.subproblem, optimizer_with_attributes(node.optimizer, "optcr"=>0.0)
+    else
+        set_optimizer(node.subproblem, node.optimizer)
     end
 
     return (
@@ -902,11 +904,11 @@ function _kelley(
             set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
         else
             set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0))
-            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0)
+            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0))
         end
-    elseif
-        set_optimizer(approx_model, optimizer_with_attributes(integrality_handler.optimizer, "optcr"=>0.0)
-        set_optimizer(model, optimizer_with_attributes(integrality_handler.optimizer, "optcr"=>0.0)
+    else
+        set_optimizer(approx_model, integrality_handler.optimizer)
+        set_optimizer(model, integrality_handler.optimizer)
     end
 
     # Objective estimate and Lagrangian duals
@@ -1035,7 +1037,7 @@ function _kelley(
         dual_vars .= value.(x)
 
         # Logging
-        print_helper(print_lag_iteration, lag_log_file_handle, iter, f_approx, best_actual, f_actual)
+        # print_helper(print_lag_iteration, lag_log_file_handle, iter, f_approx, best_actual, f_actual)
 
     end
 
@@ -1081,9 +1083,10 @@ Initializing duals.
 """
 function initialize_duals(
     node::SDDP.Node,
-    subproblem::JuMP.Model,
     dual_regime::Symbol,
 )
+
+    subproblem = node.subproblem
 
     # Get number of states and create zero vector for duals
     number_of_states = length(node.states)
@@ -1129,6 +1132,8 @@ function initialize_duals(
 
         # Undo relaxation
         undo_relax()
+
+    end
 
     return dual_vars_initial
 end
@@ -1191,11 +1196,11 @@ function _bundle_level(
             set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
         else
             set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0))
-            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0)
+            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0))
         end
-    elseif
-        set_optimizer(approx_model, optimizer_with_attributes(integrality_handler.optimizer, "optcr"=>0.0)
-        set_optimizer(model, optimizer_with_attributes(integrality_handler.optimizer, "optcr"=>0.0)
+    else
+        set_optimizer(approx_model, integrality_handler.optimizer)
+        set_optimizer(model, integrality_handler.optimizer)
     end
 
     # Define Lagrangian dual multipliers
@@ -1400,11 +1405,11 @@ function _getStrengtheningInformation(
             set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
         else
             set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0))
-            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0)
+            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0))
         end
-    elseif
-        set_optimizer(approx_model, optimizer_with_attributes(integrality_handler.optimizer, "optcr"=>0.0)
-        set_optimizer(model, optimizer_with_attributes(integrality_handler.optimizer, "optcr"=>0.0)
+    else
+        set_optimizer(approx_model, integrality_handler.optimizer)
+        set_optimizer(model, integrality_handler.optimizer)
     end
 
     # SOLVE LAGRANGIAN RELAXATION FOR GIVEN DUAL_VARS

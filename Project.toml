@@ -4,8 +4,11 @@ authors = ["Oscar Dowson <o.dowson@gmail.com"]
 version = "0.3.14"
 
 [deps]
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+GAMS = "1ca51c6a-1b4d-4546-9ae1-53e0a243ab12"
 HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
+Infiltrator = "5903a43b-9cc3-4c30-8d17-598619ec4e9b"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"

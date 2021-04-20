@@ -28,7 +28,7 @@ function air_conditioning_model(integrality_handler, iteration_limit, solver)
         optimizer = GLPK.Optimizer,
         integrality_handler = integrality_handler,
     ) do sp, stage
-        @variable(sp, 0 <= stored_production <= 100, Int, SDDP.State, initial_value = 0, epislon = binaryPrecision)
+        @variable(sp, 0 <= stored_production <= 100, Int, SDDP.State, initial_value = 0)
         @variable(sp, 0 <= production <= 200, Int)
         @variable(sp, overtime >= 0, Int)
         @variable(sp, demand)

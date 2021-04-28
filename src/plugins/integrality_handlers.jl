@@ -1108,8 +1108,9 @@ function initialize_duals(
 
         # Get dual values (reduced costs) for states as initial solution
         for (i, name) in enumerate(keys(node.states))
-           reference_to_constr = FixRef(name)
-           dual_vars_initial[i] = JuMP.getdual(reference_to_constr)
+           variable_name = node.states[name].in
+           reference_to_constr = FixRef(variable_name)
+           dual_vars_initial[i] = JuMP.dual(reference_to_constr)
         end
 
         # Undo relaxation
@@ -1126,8 +1127,9 @@ function initialize_duals(
 
         # Get dual values (reduced costs) for binary states as initial solution
         for (i, name) in enumerate(keys(node.states))
-           reference_to_constr = FixRef(name)
-           dual_vars_initial[i] = JuMP.getdual(reference_to_constr)
+            variable_name = node.states[name].in
+            reference_to_constr = FixRef(variable_name)
+           dual_vars_initial[i] = JuMP.dual(reference_to_constr)
         end
 
         # Undo relaxation
@@ -1199,7 +1201,7 @@ function _bundle_level(
             set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0))
         end
     else
-        set_optimizer(approx_model, integrality_handler.optimizer)
+        set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>"CPLEX", "optcr"=>0.0))
         set_optimizer(model, integrality_handler.optimizer)
     end
 
@@ -1349,7 +1351,7 @@ function _bundle_level(
         else
             level = f_approx - gap * level_factor
             #- atol/10.0 for numerical issues?
-            JuMP.setlowerbound(θ, level)
+            JuMP.set_lower_bound(θ, level)
         end
 
         # DETERMINE NEXT ITERATE USING PROXIMAL PROBLEM
@@ -1398,24 +1400,20 @@ function _getStrengtheningInformation(
 
     if integrality_handler.optimizer == "GAMS"
         if algoParams.solver == "CPLEX"
-            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
             set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
         elseif algoParams.solver == "Gurobi"
-            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "NumericFocus"=>1))
             set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
         else
-            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0))
             set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0))
         end
     else
-        set_optimizer(approx_model, integrality_handler.optimizer)
         set_optimizer(model, integrality_handler.optimizer)
     end
 
     # SOLVE LAGRANGIAN RELAXATION FOR GIVEN DUAL_VARS
     ########################################################################
     # Evaluate the real function and a subgradient
-    best_actual = _solve_Lagrangian_relaxation!(subgradients, node, dual_vars, integrality_handler.slacks, :no)
+    best_actual = _solve_Lagrangian_relaxation!(integrality_handler.subgradients, node, dual_vars, integrality_handler.slacks, :no)
 
     # Logging
     # print_helper(print_lag_iteration, lag_log_file_handle, iter, f_approx, best_actual, f_actual)

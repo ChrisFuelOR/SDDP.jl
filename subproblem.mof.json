@@ -150,6 +150,17 @@
       }
     },
     {
+      "name": "c2_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "stored_production_in"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 100.0
+      }
+    },
+    {
       "name": "c3_1",
       "function": {
         "type": "SingleVariable",

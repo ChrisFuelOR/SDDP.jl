@@ -150,7 +150,7 @@ function set_incoming_state(node::Node, state::Dict{Symbol,Float64})
         if has_upper_bound(node.states[state_name].out)
             node.ext[:upper_bounds][state_name] = JuMP.upper_bound(node.states[state_name].out)
         end
-        JuMP.fix(node.states[state_name].in, value)
+        JuMP.fix(node.states[state_name].in, value, force=true)
     end
     return
 end

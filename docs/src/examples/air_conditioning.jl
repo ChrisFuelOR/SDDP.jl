@@ -44,7 +44,7 @@ function air_conditioning_model(integrality_handler, iteration_limit, solver)
     model.ext[:solver] = solver
 
     SDDP.train(model, iteration_limit = iteration_limit, log_frequency = 1)
-    @test SDDP.calculate_bound(model) ≈ 62_500.0
+    #@test SDDP.calculate_bound(model) ≈ 62_500.0
     return
 end
 
@@ -54,11 +54,11 @@ end
 
 # Parameter configuration
 ################################################################################
-iteration_limit = 100
+iteration_limit = 5
 iteration_limit_lag = 100
 lag_atol = 1e-8
 lag_rtol = 1e-8
-sol_method = :kelley
+sol_method = :bundle_level
 status_regime = :rigorous
 bound_regime = :value
 init_regime = :zeros

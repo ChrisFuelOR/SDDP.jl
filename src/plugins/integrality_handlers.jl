@@ -762,7 +762,7 @@ function get_dual_variables(
         # Create Benders cut by solving LP relaxation
 
         TimerOutputs.@timeit SDDP_TIMER "dual_initialization" begin
-            dual_vars = initialize_duals(node, :LP)
+            dual_vars = -initialize_duals(node, :LP)
         end
         lag_obj = JuMP.objective_value(node.subproblem)
         lag_status = :B
@@ -773,7 +773,7 @@ function get_dual_variables(
 
         # Initialize dual variables by solving LP dual
         TimerOutputs.@timeit SDDP_TIMER "dual_initialization" begin
-            dual_vars = initialize_duals(node, :LP)
+            dual_vars = -initialize_duals(node, :LP)
         end
 
         # solve lagrangian relaxed problem for these dual values
@@ -784,7 +784,7 @@ function get_dual_variables(
     elseif integrality_handler.algoParams.cut_type == :L
         ########################################################################
         TimerOutputs.@timeit SDDP_TIMER "dual_initialization" begin
-            dual_vars = initialize_duals(node, integrality_handler.algoParams.init_regime)
+            dual_vars = -initialize_duals(node, integrality_handler.algoParams.init_regime)
         end
 
         try

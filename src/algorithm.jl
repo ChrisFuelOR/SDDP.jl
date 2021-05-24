@@ -794,12 +794,14 @@ function iteration(model::PolicyGraph{T}, options::Options) where {T}
     TimerOutputs.@timeit SDDP_TIMER "calculate_bound" begin
         bound = calculate_bound(model)
     end
+
     push!(
         options.log,
         Log(
             length(options.log) + 1,
             bound,
             forward_trajectory.cumulative_value,
+            forward_trajectory.scenario_path,
             time() - options.start_time,
             Distributed.myid(),
             model.ext[:total_solves],

@@ -9,10 +9,28 @@
       "name": "demand"
     },
     {
-      "name": "stored_production_in"
+      "name": "stored_production_out"
     },
     {
-      "name": "stored_production_out"
+      "name": "_bin_stored_production[1]_in"
+    },
+    {
+      "name": "_bin_stored_production[2]_in"
+    },
+    {
+      "name": "_bin_stored_production[3]_in"
+    },
+    {
+      "name": "_bin_stored_production[4]_in"
+    },
+    {
+      "name": "_bin_stored_production[5]_in"
+    },
+    {
+      "name": "_bin_stored_production[6]_in"
+    },
+    {
+      "name": "_bin_stored_production[7]_in"
     },
     {
       "name": "production"
@@ -21,7 +39,31 @@
       "name": "overtime"
     },
     {
-      "name": "x6"
+      "name": "x12"
+    },
+    {
+      "name": "_bin_stored_production[1]_out"
+    },
+    {
+      "name": "_bin_stored_production[2]_out"
+    },
+    {
+      "name": "_bin_stored_production[3]_out"
+    },
+    {
+      "name": "_bin_stored_production[4]_out"
+    },
+    {
+      "name": "_bin_stored_production[5]_out"
+    },
+    {
+      "name": "_bin_stored_production[6]_out"
+    },
+    {
+      "name": "_bin_stored_production[7]_out"
+    },
+    {
+      "name": "stored_production_in"
     }
   ],
   "objective": {
@@ -43,7 +85,7 @@
         },
         {
           "coefficient": 1.0,
-          "variable": "x6"
+          "variable": "x12"
         }
       ],
       "constant": 0.0
@@ -56,12 +98,98 @@
         "type": "ScalarAffineFunction",
         "terms": [
           {
+            "coefficient": -1.0,
+            "variable": "_bin_stored_production[1]_in"
+          },
+          {
+            "coefficient": -2.0,
+            "variable": "_bin_stored_production[2]_in"
+          },
+          {
+            "coefficient": -4.0,
+            "variable": "_bin_stored_production[3]_in"
+          },
+          {
+            "coefficient": -8.0,
+            "variable": "_bin_stored_production[4]_in"
+          },
+          {
+            "coefficient": -16.0,
+            "variable": "_bin_stored_production[5]_in"
+          },
+          {
+            "coefficient": -32.0,
+            "variable": "_bin_stored_production[6]_in"
+          },
+          {
+            "coefficient": -64.0,
+            "variable": "_bin_stored_production[7]_in"
+          },
+          {
             "coefficient": 1.0,
-            "variable": "demand"
+            "variable": "stored_production_in"
+          }
+        ],
+        "constant": 0.0
+      },
+      "set": {
+        "type": "EqualTo",
+        "value": 0.0
+      }
+    },
+    {
+      "name": "c2",
+      "function": {
+        "type": "ScalarAffineFunction",
+        "terms": [
+          {
+            "coefficient": 1.0,
+            "variable": "stored_production_out"
           },
           {
             "coefficient": -1.0,
-            "variable": "stored_production_in"
+            "variable": "_bin_stored_production[1]_out"
+          },
+          {
+            "coefficient": -2.0,
+            "variable": "_bin_stored_production[2]_out"
+          },
+          {
+            "coefficient": -4.0,
+            "variable": "_bin_stored_production[3]_out"
+          },
+          {
+            "coefficient": -8.0,
+            "variable": "_bin_stored_production[4]_out"
+          },
+          {
+            "coefficient": -16.0,
+            "variable": "_bin_stored_production[5]_out"
+          },
+          {
+            "coefficient": -32.0,
+            "variable": "_bin_stored_production[6]_out"
+          },
+          {
+            "coefficient": -64.0,
+            "variable": "_bin_stored_production[7]_out"
+          }
+        ],
+        "constant": 0.0
+      },
+      "set": {
+        "type": "EqualTo",
+        "value": 0.0
+      }
+    },
+    {
+      "name": "c3",
+      "function": {
+        "type": "ScalarAffineFunction",
+        "terms": [
+          {
+            "coefficient": 1.0,
+            "variable": "demand"
           },
           {
             "coefficient": 1.0,
@@ -74,6 +202,10 @@
           {
             "coefficient": -1.0,
             "variable": "overtime"
+          },
+          {
+            "coefficient": -1.0,
+            "variable": "stored_production_in"
           }
         ],
         "constant": 0.0
@@ -84,6 +216,51 @@
       }
     },
     {
+      "name": "c4",
+      "function": {
+        "type": "ScalarAffineFunction",
+        "terms": [
+          {
+            "coefficient": 1.0,
+            "variable": "x12"
+          },
+          {
+            "coefficient": 1451.5675955376794,
+            "variable": "_bin_stored_production[1]_out"
+          },
+          {
+            "coefficient": 1451.5675955376794,
+            "variable": "_bin_stored_production[2]_out"
+          },
+          {
+            "coefficient": 1451.5675955376794,
+            "variable": "_bin_stored_production[3]_out"
+          },
+          {
+            "coefficient": 1451.5675955376794,
+            "variable": "_bin_stored_production[4]_out"
+          },
+          {
+            "coefficient": 3277.1442518189783,
+            "variable": "_bin_stored_production[5]_out"
+          },
+          {
+            "coefficient": 3277.1442518189783,
+            "variable": "_bin_stored_production[6]_out"
+          },
+          {
+            "coefficient": 6401.104887897559,
+            "variable": "_bin_stored_production[7]_out"
+          }
+        ],
+        "constant": 0.0
+      },
+      "set": {
+        "type": "GreaterThan",
+        "lower": 20000.0
+      }
+    },
+    {
       "name": "c1_1",
       "function": {
         "type": "SingleVariable",
@@ -91,22 +268,11 @@
       },
       "set": {
         "type": "EqualTo",
-        "value": 100.0
+        "value": 200.0
       }
     },
     {
-      "name": "c2",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "stored_production_in"
-      },
-      "set": {
-        "type": "GreaterThan",
-        "lower": 0.0
-      }
-    },
-    {
-      "name": "c3",
+      "name": "c2_1",
       "function": {
         "type": "SingleVariable",
         "variable": "stored_production_out"
@@ -117,10 +283,21 @@
       }
     },
     {
-      "name": "c4",
+      "name": "c3_1",
       "function": {
         "type": "SingleVariable",
-        "variable": "production"
+        "variable": "_bin_stored_production[1]_in"
+      },
+      "set": {
+        "type": "GreaterThan",
+        "lower": 0.0
+      }
+    },
+    {
+      "name": "c4_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "_bin_stored_production[2]_in"
       },
       "set": {
         "type": "GreaterThan",
@@ -131,7 +308,7 @@
       "name": "c5",
       "function": {
         "type": "SingleVariable",
-        "variable": "overtime"
+        "variable": "_bin_stored_production[3]_in"
       },
       "set": {
         "type": "GreaterThan",
@@ -142,7 +319,7 @@
       "name": "c6",
       "function": {
         "type": "SingleVariable",
-        "variable": "x6"
+        "variable": "_bin_stored_production[4]_in"
       },
       "set": {
         "type": "GreaterThan",
@@ -150,18 +327,73 @@
       }
     },
     {
-      "name": "c2_1",
+      "name": "c7",
       "function": {
         "type": "SingleVariable",
-        "variable": "stored_production_in"
+        "variable": "_bin_stored_production[5]_in"
       },
       "set": {
-        "type": "LessThan",
-        "upper": 100.0
+        "type": "GreaterThan",
+        "lower": 0.0
       }
     },
     {
-      "name": "c3_1",
+      "name": "c8",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "_bin_stored_production[6]_in"
+      },
+      "set": {
+        "type": "GreaterThan",
+        "lower": 0.0
+      }
+    },
+    {
+      "name": "c9",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "_bin_stored_production[7]_in"
+      },
+      "set": {
+        "type": "GreaterThan",
+        "lower": 0.0
+      }
+    },
+    {
+      "name": "c10",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "production"
+      },
+      "set": {
+        "type": "GreaterThan",
+        "lower": 0.0
+      }
+    },
+    {
+      "name": "c11",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "overtime"
+      },
+      "set": {
+        "type": "GreaterThan",
+        "lower": 0.0
+      }
+    },
+    {
+      "name": "c12",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "x12"
+      },
+      "set": {
+        "type": "GreaterThan",
+        "lower": 0.0
+      }
+    },
+    {
+      "name": "c2_2",
       "function": {
         "type": "SingleVariable",
         "variable": "stored_production_out"
@@ -172,7 +404,84 @@
       }
     },
     {
-      "name": "c4_1",
+      "name": "c3_2",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "_bin_stored_production[1]_in"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 1.0
+      }
+    },
+    {
+      "name": "c4_2",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "_bin_stored_production[2]_in"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 1.0
+      }
+    },
+    {
+      "name": "c5_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "_bin_stored_production[3]_in"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 1.0
+      }
+    },
+    {
+      "name": "c6_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "_bin_stored_production[4]_in"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 1.0
+      }
+    },
+    {
+      "name": "c7_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "_bin_stored_production[5]_in"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 1.0
+      }
+    },
+    {
+      "name": "c8_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "_bin_stored_production[6]_in"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 1.0
+      }
+    },
+    {
+      "name": "c9_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "_bin_stored_production[7]_in"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 1.0
+      }
+    },
+    {
+      "name": "c10_1",
       "function": {
         "type": "SingleVariable",
         "variable": "production"
@@ -183,14 +492,103 @@
       }
     },
     {
-      "name": "c6_1",
+      "name": "c2_3",
       "function": {
         "type": "SingleVariable",
-        "variable": "x6"
+        "variable": "stored_production_out"
       },
       "set": {
-        "type": "LessThan",
-        "upper": 0.0
+        "type": "Integer"
+      }
+    },
+    {
+      "name": "c10_2",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "production"
+      },
+      "set": {
+        "type": "Integer"
+      }
+    },
+    {
+      "name": "c11_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "overtime"
+      },
+      "set": {
+        "type": "Integer"
+      }
+    },
+    {
+      "name": "c13",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "_bin_stored_production[1]_out"
+      },
+      "set": {
+        "type": "ZeroOne"
+      }
+    },
+    {
+      "name": "c14",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "_bin_stored_production[2]_out"
+      },
+      "set": {
+        "type": "ZeroOne"
+      }
+    },
+    {
+      "name": "c15",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "_bin_stored_production[3]_out"
+      },
+      "set": {
+        "type": "ZeroOne"
+      }
+    },
+    {
+      "name": "c16",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "_bin_stored_production[4]_out"
+      },
+      "set": {
+        "type": "ZeroOne"
+      }
+    },
+    {
+      "name": "c17",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "_bin_stored_production[5]_out"
+      },
+      "set": {
+        "type": "ZeroOne"
+      }
+    },
+    {
+      "name": "c18",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "_bin_stored_production[6]_out"
+      },
+      "set": {
+        "type": "ZeroOne"
+      }
+    },
+    {
+      "name": "c19",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "_bin_stored_production[7]_out"
+      },
+      "set": {
+        "type": "ZeroOne"
       }
     }
   ]

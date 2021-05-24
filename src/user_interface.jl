@@ -404,6 +404,7 @@ struct Log
     iteration::Int
     bound::Float64
     simulation_value::Float64
+    scenario_path::Any
     time::Float64
     pid::Int
     total_solves::Int

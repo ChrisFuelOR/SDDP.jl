@@ -105,6 +105,7 @@ function print_iteration(io, log::Log)
     print(io, "     ")
     print(io, log.lag_iterations)
     print(io, log.lag_status)
+    # print(io, "  ", log.scenario_path)
 
     println(io)
     flush(io)

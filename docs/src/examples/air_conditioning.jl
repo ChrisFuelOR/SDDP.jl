@@ -32,7 +32,8 @@ function air_conditioning_model(integrality_handler, iteration_limit, solver)
         @variable(sp, 0 <= production <= 200, Int)
         @variable(sp, overtime >= 0, Int)
         @variable(sp, demand)
-        DEMAND = [[100.0], [100.0, 300.0], [100.0, 300.0]]
+        DEMAND = [[100.0], [200.0], [200.0]]
+        #DEMAND = [[100.0], [100.0, 300.0], [100.0, 300.0]]
         SDDP.parameterize(ω -> JuMP.fix(demand, ω), sp, DEMAND[stage])
         @constraint(
             sp,
@@ -54,12 +55,12 @@ end
 
 # Parameter configuration
 ################################################################################
-iteration_limit = 5
+iteration_limit = 10
 iteration_limit_lag = 100
 lag_atol = 1e-8
 lag_rtol = 1e-8
 sol_method = :bundle_level
-status_regime = :rigorous
+status_regime = :lax
 bound_regime = :value
 init_regime = :zeros
 cut_type = :L
@@ -68,12 +69,12 @@ lag_solver = GLPK.Optimizer
 bundle_alpha = 0.5
 bundle_factor = 1.0
 level_factor = 0.2
-binaryPrecision = 0.1
+binaryPrecision = 1
 
 bundleParams = SDDP.BundleParams(bundle_alpha, bundle_factor, level_factor)
 algoParams = SDDP.AlgoParams(sol_method, status_regime, bound_regime, init_regime, cut_type, lag_solver, bundleParams, binaryPrecision)
 ################################################################################
 
-for integrality_handler in [SDDP.SDDiP_con(algoParams=algoParams, rtol=lag_rtol, atol=lag_atol, iteration_limit=iteration_limit_lag)]
+for integrality_handler in [SDDP.SDDiP_bin(algoParams=algoParams, rtol=lag_rtol, atol=lag_atol, iteration_limit=iteration_limit_lag)]
     air_conditioning_model(integrality_handler, iteration_limit, solver)
 end

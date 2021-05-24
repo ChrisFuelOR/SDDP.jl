@@ -14,10 +14,10 @@ function generation_expansion(integrality_handler)
     capacities = ones(num_units)
     demand_vals =
         0.5 * [
+            25 11 4 14 4 6 15 12
             5 5 5 5 5 5 5 5
             4 3 1 3 0 9 8 17
             0 9 4 2 19 19 13 7
-            25 11 4 14 4 6 15 12
             6 7 5 3 8 4 17 13
         ]
     ## Cost of unmet demand
@@ -64,10 +64,10 @@ function generation_expansion(integrality_handler)
             (investment_cost + generation * use_cost) * rho^(stage - 1) + penalty * unmet
         )
     end
-    SDDP.train(model, iteration_limit = 50, log_frequency = 10)
+    SDDP.train(model, iteration_limit = 100, log_frequency = 1)
     @test SDDP.calculate_bound(model) ≈ 2.078860e6 atol = 1e3
     return
 end
 
 ## Solve a continuous relaxation only, tough for SDDiP.
-generation_expansion(SDDP.ContinuousRelaxation())
+generation_expansion(SDDP.SDDiP())

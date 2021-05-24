@@ -13,7 +13,7 @@ using SDDP, GLPK, Test
 
 function sldp_example_two(; first_stage_integer::Bool = true, N = 2)
     model = SDDP.LinearPolicyGraph(
-        stages = 2,
+        stages = 24,
         lower_bound = -100.0,
         optimizer = GLPK.Optimizer,
     ) do sp, t
@@ -36,7 +36,7 @@ function sldp_example_two(; first_stage_integer::Bool = true, N = 2)
             end
         end
     end
-    SDDP.train(model, iteration_limit = 100, log_frequency = 10)
+    SDDP.train(model, iteration_limit = 100, log_frequency = 1)
     bound = SDDP.calculate_bound(model)
 
     if N == 2

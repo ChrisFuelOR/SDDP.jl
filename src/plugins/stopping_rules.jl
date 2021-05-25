@@ -106,7 +106,7 @@ end
 """
     BoundStalling(num_previous_iterations::Int, tolerance::Float64)
 
-Teriminate the algorithm once the deterministic bound (lower if minimizing,
+Terminate the algorithm once the deterministic bound (lower if minimizing,
 upper if maximizing) fails to improve by more than `tolerance` in absolute terms
 for more than `num_previous_iterations` consecutve iterations.
 """
@@ -132,4 +132,42 @@ function convergence_test(
         end
     end
     return true
+end
+
+# ======================= Deterministic Stopping Rule ====================== #
+
+"""
+    DeterministicStopping()
+
+Terminate the algorithm once deterministic optimality is reached.
+This stopping rule is only valid for deterministic problems.
+"""
+struct DeterministicStopping <: SDDP.AbstractStoppingRule
+    atol::Float64
+    rtol::Float64
+    sense::MOI.OptimizationSense
+    function DeterministicStopping(;
+        atol = 0,
+        rtol = 1,
+        sense = MOI.MIN_SENSE,
+    )
+        return new(atol, rtol, sense)
+    end
+end
+
+stopping_rule_status(::DeterministicStopping) = :DeterministicStopping
+
+function convergence_test(graph::PolicyGraph, log::Vector{Log}, rule::DeterministicStopping)
+
+    bool_abs = abs(log[end].simulation_value - log[end].bound) <= rule.atol
+    bool_rel = abs(log[end].simulation_value - log[end].bound) / abs(max(log[end].simulation_value, log[end].bound)) <= rule.rtol
+
+    bool_g = 0
+    if rule.sense == MOI.MIN_SENSE
+        bool_g = log[end].simulation_value >= log[end].bound
+    else
+        bool_g = log[end].simulation_value <= log[end].bound
+    end
+
+    return (bool_abs || bool_rel) && bool_g
 end

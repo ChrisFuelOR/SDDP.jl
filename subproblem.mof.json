@@ -225,31 +225,31 @@
             "variable": "x12"
           },
           {
-            "coefficient": 1451.5675955376794,
+            "coefficient": 1451.5482959985864,
             "variable": "_bin_stored_production[1]_out"
           },
           {
-            "coefficient": 1451.5675955376794,
+            "coefficient": 1451.5482959985864,
             "variable": "_bin_stored_production[2]_out"
           },
           {
-            "coefficient": 1451.5675955376794,
+            "coefficient": 1451.5482959985864,
             "variable": "_bin_stored_production[3]_out"
           },
           {
-            "coefficient": 1451.5675955376794,
+            "coefficient": 1451.5482959985864,
             "variable": "_bin_stored_production[4]_out"
           },
           {
-            "coefficient": 3277.1442518189783,
+            "coefficient": 3277.2522405618392,
             "variable": "_bin_stored_production[5]_out"
           },
           {
-            "coefficient": 3277.1442518189783,
+            "coefficient": 3277.2522405618392,
             "variable": "_bin_stored_production[6]_out"
           },
           {
-            "coefficient": 6401.104887897559,
+            "coefficient": 6401.0325897083085,
             "variable": "_bin_stored_production[7]_out"
           }
         ],

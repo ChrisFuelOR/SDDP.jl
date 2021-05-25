@@ -18,7 +18,7 @@
 
 # The known optimal solution is \\\$62,500
 
-using SDDP, GLPK, Test, Infiltrator
+using SDDP, GLPK, Test, Infiltrator, GAMS, Gurobi
 
 function air_conditioning_model(integrality_handler, iteration_limit, solver)
 
@@ -44,7 +44,12 @@ function air_conditioning_model(integrality_handler, iteration_limit, solver)
 
     model.ext[:solver] = solver
 
-    SDDP.train(model, iteration_limit = iteration_limit, log_frequency = 1)
+    SDDP.train(
+        model,
+        iteration_limit = iteration_limit,
+        stopping_rules = [SDDP.DeterministicStopping()],
+        log_frequency = 1,
+        print_level = 2)
     #@test SDDP.calculate_bound(model) ≈ 62_500.0
     return
 end
@@ -55,12 +60,12 @@ end
 
 # Parameter configuration
 ################################################################################
-iteration_limit = 10
+iteration_limit = 5
 iteration_limit_lag = 100
 lag_atol = 1e-8
 lag_rtol = 1e-8
-sol_method = :bundle_level
-status_regime = :lax
+sol_method = :kelley
+status_regime = :rigorous
 bound_regime = :value
 init_regime = :zeros
 cut_type = :L
@@ -70,9 +75,10 @@ bundle_alpha = 0.5
 bundle_factor = 1.0
 level_factor = 0.2
 binaryPrecision = 1
+numerical_focus = :no
 
 bundleParams = SDDP.BundleParams(bundle_alpha, bundle_factor, level_factor)
-algoParams = SDDP.AlgoParams(sol_method, status_regime, bound_regime, init_regime, cut_type, lag_solver, bundleParams, binaryPrecision)
+algoParams = SDDP.AlgoParams(sol_method, status_regime, bound_regime, init_regime, cut_type, lag_solver, bundleParams, binaryPrecision, numerical_focus)
 ################################################################################
 
 for integrality_handler in [SDDP.SDDiP_bin(algoParams=algoParams, rtol=lag_rtol, atol=lag_atol, iteration_limit=iteration_limit_lag)]

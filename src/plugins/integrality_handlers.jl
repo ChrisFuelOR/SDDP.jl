@@ -471,6 +471,7 @@ mutable struct AlgoParams
     solver::Any
     bundle_parameters::Union{Nothing, BundleParams}
     binaryPrecision::Union{Nothing, Float64}
+    numerical_focus::Symbol
 end
 
 # =========================== SDDiP_bin ====================================== #
@@ -895,13 +896,15 @@ function _kelley(
     # Approximation of Lagrangian dual as a function of the multipliers
     approx_model = JuMP.Model(integrality_handler.optimizer)
 
+    numerical_focus = (algoParams.numerical_focus == :yes ? 1 : 0)
+
     if integrality_handler.optimizer == "GAMS"
         if algoParams.solver == "CPLEX"
-            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
-            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
+            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>numerical_focus))
+            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>numerical_focus))
         elseif algoParams.solver == "Gurobi"
-            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "NumericFocus"=>1))
-            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
+            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "NumericFocus"=>numerical_focus))
+            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "NumericFocus"=>numerical_focus))
         else
             set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0))
             set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0))
@@ -1189,19 +1192,22 @@ function _bundle_level(
     # Approximation of Lagrangian dual as a function of the multipliers
     approx_model = JuMP.Model(integrality_handler.optimizer)
 
+    numerical_focus = (algoParams.numerical_focus == :yes ? 1 : 0)
+
     if integrality_handler.optimizer == "GAMS"
         if algoParams.solver == "CPLEX"
-            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
-            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
+            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>numerical_focus))
+            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>numerical_focus))
         elseif algoParams.solver == "Gurobi"
-            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "NumericFocus"=>1))
-            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "numericalemphasis"=>0))
+            set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "NumericFocus"=>numerical_focus))
+            set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0, "NumericFocus"=>numerical_focus))
         else
             set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0))
             set_optimizer(model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>algoParams.solver, "optcr"=>0.0))
         end
     else
-        set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>"CPLEX", "optcr"=>0.0))
+        #set_optimizer(approx_model, optimizer_with_attributes(GAMS.Optimizer, "Solver"=>"CPLEX", "optcr"=>0.0, "numericalemphasis"=>numerical_focus))
+        set_optimizer(approx_model, integrality_handler.optimizer)
         set_optimizer(model, integrality_handler.optimizer)
     end
 

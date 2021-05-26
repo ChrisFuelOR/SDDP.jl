@@ -148,7 +148,7 @@ struct DeterministicStopping <: SDDP.AbstractStoppingRule
     sense::MOI.OptimizationSense
     function DeterministicStopping(;
         atol = 0,
-        rtol = 1,
+        rtol = 0,
         sense = MOI.MIN_SENSE,
     )
         return new(atol, rtol, sense)

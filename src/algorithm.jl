@@ -809,6 +809,9 @@ function iteration(model::PolicyGraph{T}, options::Options) where {T}
             model.ext[:lag_status],
         ),
     )
+
+    @infiltrate
+
     has_converged, status = convergence_test(model, options.log, options.stopping_rules)
     return IterationResult(
         Distributed.myid(),

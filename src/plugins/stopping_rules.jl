@@ -164,9 +164,9 @@ function convergence_test(graph::PolicyGraph, log::Vector{Log}, rule::Determinis
 
     bool_g = 0
     if rule.sense == MOI.MIN_SENSE
-        bool_g = log[end].simulation_value >= log[end].bound
+        bool_g = log[end].simulation_value - log[end].bound >= - 1e-5
     else
-        bool_g = log[end].simulation_value <= log[end].bound
+        bool_g = log[end].bound - log[end].simulation_value >= - 1e-5
     end
 
     return (bool_abs || bool_rel) && bool_g

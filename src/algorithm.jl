@@ -150,6 +150,7 @@ function set_incoming_state(node::Node, state::Dict{Symbol,Float64})
         if has_upper_bound(node.states[state_name].out)
             node.ext[:upper_bounds][state_name] = JuMP.upper_bound(node.states[state_name].out)
         end
+
         JuMP.fix(node.states[state_name].in, value, force=true)
     end
     return
@@ -809,8 +810,6 @@ function iteration(model::PolicyGraph{T}, options::Options) where {T}
             model.ext[:lag_status],
         ),
     )
-
-    @infiltrate
 
     has_converged, status = convergence_test(model, options.log, options.stopping_rules)
     return IterationResult(

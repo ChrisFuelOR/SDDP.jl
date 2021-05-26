@@ -9,16 +9,34 @@
       "name": "commit[1]_in"
     },
     {
-      "name": "commit[1]_out"
-    },
-    {
       "name": "commit[2]_in"
     },
     {
-      "name": "commit[2]_out"
+      "name": "commit[3]_in"
     },
     {
-      "name": "commit[3]_in"
+      "name": "gen[1]_in"
+    },
+    {
+      "name": "gen[2]_in"
+    },
+    {
+      "name": "gen[3]_in"
+    },
+    {
+      "name": "storage_level[1]_out"
+    },
+    {
+      "name": "storage_level[2]_in"
+    },
+    {
+      "name": "storage_level[2]_out"
+    },
+    {
+      "name": "commit[1]_out"
+    },
+    {
+      "name": "commit[2]_out"
     },
     {
       "name": "commit[3]_out"
@@ -27,46 +45,28 @@
       "name": "gen[1]_out"
     },
     {
-      "name": "_bin_gen[1][1]_in"
-    },
-    {
-      "name": "_bin_gen[1][2]_in"
-    },
-    {
-      "name": "_bin_gen[1][3]_in"
-    },
-    {
-      "name": "_bin_gen[1][4]_in"
-    },
-    {
       "name": "gen[2]_out"
-    },
-    {
-      "name": "_bin_gen[2][1]_in"
-    },
-    {
-      "name": "_bin_gen[2][2]_in"
-    },
-    {
-      "name": "_bin_gen[2][3]_in"
-    },
-    {
-      "name": "_bin_gen[2][4]_in"
     },
     {
       "name": "gen[3]_out"
     },
     {
-      "name": "_bin_gen[3][1]_in"
+      "name": "up[1]"
     },
     {
-      "name": "_bin_gen[3][2]_in"
+      "name": "up[2]"
     },
     {
-      "name": "_bin_gen[3][3]_in"
+      "name": "up[3]"
     },
     {
-      "name": "_bin_gen[3][4]_in"
+      "name": "down[1]"
+    },
+    {
+      "name": "down[2]"
+    },
+    {
+      "name": "down[3]"
     },
     {
       "name": "demand_slack"
@@ -111,70 +111,22 @@
       "name": "om_costs[3]"
     },
     {
-      "name": "x36"
+      "name": "storage_gen[1]"
     },
     {
-      "name": "_bin_gen[1][1]_out"
+      "name": "storage_gen[2]"
     },
     {
-      "name": "_bin_gen[1][2]_out"
+      "name": "storage_pump[1]"
     },
     {
-      "name": "_bin_gen[1][3]_out"
+      "name": "storage_pump[2]"
     },
     {
-      "name": "_bin_gen[1][4]_out"
+      "name": "x40"
     },
     {
-      "name": "_bin_gen[2][1]_out"
-    },
-    {
-      "name": "_bin_gen[2][2]_out"
-    },
-    {
-      "name": "_bin_gen[2][3]_out"
-    },
-    {
-      "name": "_bin_gen[2][4]_out"
-    },
-    {
-      "name": "_bin_gen[3][1]_out"
-    },
-    {
-      "name": "_bin_gen[3][2]_out"
-    },
-    {
-      "name": "_bin_gen[3][3]_out"
-    },
-    {
-      "name": "_bin_gen[3][4]_out"
-    },
-    {
-      "name": "up[1]"
-    },
-    {
-      "name": "up[2]"
-    },
-    {
-      "name": "up[3]"
-    },
-    {
-      "name": "down[1]"
-    },
-    {
-      "name": "down[2]"
-    },
-    {
-      "name": "down[3]"
-    },
-    {
-      "name": "gen[1]_in"
-    },
-    {
-      "name": "gen[2]_in"
-    },
-    {
-      "name": "gen[3]_in"
+      "name": "storage_level[1]_in"
     }
   ],
   "objective": {
@@ -240,7 +192,7 @@
         },
         {
           "coefficient": 1.0,
-          "variable": "x36"
+          "variable": "x40"
         }
       ],
       "constant": 0.0
@@ -248,201 +200,61 @@
   },
   "constraints": [
     {
-      "name": "c1",
+      "name": "level_balance[1]",
       "function": {
         "type": "ScalarAffineFunction",
         "terms": [
           {
-            "coefficient": -0.1,
-            "variable": "_bin_gen[1][1]_in"
-          },
-          {
-            "coefficient": -0.2,
-            "variable": "_bin_gen[1][2]_in"
-          },
-          {
-            "coefficient": -0.4,
-            "variable": "_bin_gen[1][3]_in"
-          },
-          {
-            "coefficient": -0.8,
-            "variable": "_bin_gen[1][4]_in"
-          },
-          {
             "coefficient": 1.0,
-            "variable": "gen[1]_in"
+            "variable": "storage_level[1]_out"
+          },
+          {
+            "coefficient": 1.1111111111111112,
+            "variable": "storage_gen[1]"
+          },
+          {
+            "coefficient": -0.85,
+            "variable": "storage_pump[1]"
+          },
+          {
+            "coefficient": -1.0,
+            "variable": "storage_level[1]_in"
           }
         ],
         "constant": 0.0
       },
       "set": {
         "type": "EqualTo",
-        "value": 0.0
+        "value": 0.4
       }
     },
     {
-      "name": "c2",
+      "name": "level_balance[2]",
       "function": {
         "type": "ScalarAffineFunction",
         "terms": [
           {
+            "coefficient": -1.0,
+            "variable": "storage_level[2]_in"
+          },
+          {
             "coefficient": 1.0,
-            "variable": "gen[1]_out"
+            "variable": "storage_level[2]_out"
           },
           {
-            "coefficient": -0.1,
-            "variable": "_bin_gen[1][1]_out"
+            "coefficient": 1.0869565217391304,
+            "variable": "storage_gen[2]"
           },
           {
-            "coefficient": -0.2,
-            "variable": "_bin_gen[1][2]_out"
-          },
-          {
-            "coefficient": -0.4,
-            "variable": "_bin_gen[1][3]_out"
-          },
-          {
-            "coefficient": -0.8,
-            "variable": "_bin_gen[1][4]_out"
+            "coefficient": -0.87,
+            "variable": "storage_pump[2]"
           }
         ],
         "constant": 0.0
       },
       "set": {
         "type": "EqualTo",
-        "value": 0.0
-      }
-    },
-    {
-      "name": "c3",
-      "function": {
-        "type": "ScalarAffineFunction",
-        "terms": [
-          {
-            "coefficient": -0.1,
-            "variable": "_bin_gen[2][1]_in"
-          },
-          {
-            "coefficient": -0.2,
-            "variable": "_bin_gen[2][2]_in"
-          },
-          {
-            "coefficient": -0.4,
-            "variable": "_bin_gen[2][3]_in"
-          },
-          {
-            "coefficient": -0.8,
-            "variable": "_bin_gen[2][4]_in"
-          },
-          {
-            "coefficient": 1.0,
-            "variable": "gen[2]_in"
-          }
-        ],
-        "constant": 0.0
-      },
-      "set": {
-        "type": "EqualTo",
-        "value": 0.0
-      }
-    },
-    {
-      "name": "c4",
-      "function": {
-        "type": "ScalarAffineFunction",
-        "terms": [
-          {
-            "coefficient": 1.0,
-            "variable": "gen[2]_out"
-          },
-          {
-            "coefficient": -0.1,
-            "variable": "_bin_gen[2][1]_out"
-          },
-          {
-            "coefficient": -0.2,
-            "variable": "_bin_gen[2][2]_out"
-          },
-          {
-            "coefficient": -0.4,
-            "variable": "_bin_gen[2][3]_out"
-          },
-          {
-            "coefficient": -0.8,
-            "variable": "_bin_gen[2][4]_out"
-          }
-        ],
-        "constant": 0.0
-      },
-      "set": {
-        "type": "EqualTo",
-        "value": 0.0
-      }
-    },
-    {
-      "name": "c5",
-      "function": {
-        "type": "ScalarAffineFunction",
-        "terms": [
-          {
-            "coefficient": -0.1,
-            "variable": "_bin_gen[3][1]_in"
-          },
-          {
-            "coefficient": -0.2,
-            "variable": "_bin_gen[3][2]_in"
-          },
-          {
-            "coefficient": -0.4,
-            "variable": "_bin_gen[3][3]_in"
-          },
-          {
-            "coefficient": -0.8,
-            "variable": "_bin_gen[3][4]_in"
-          },
-          {
-            "coefficient": 1.0,
-            "variable": "gen[3]_in"
-          }
-        ],
-        "constant": 0.0
-      },
-      "set": {
-        "type": "EqualTo",
-        "value": 0.0
-      }
-    },
-    {
-      "name": "c6",
-      "function": {
-        "type": "ScalarAffineFunction",
-        "terms": [
-          {
-            "coefficient": 1.0,
-            "variable": "gen[3]_out"
-          },
-          {
-            "coefficient": -0.1,
-            "variable": "_bin_gen[3][1]_out"
-          },
-          {
-            "coefficient": -0.2,
-            "variable": "_bin_gen[3][2]_out"
-          },
-          {
-            "coefficient": -0.4,
-            "variable": "_bin_gen[3][3]_out"
-          },
-          {
-            "coefficient": -0.8,
-            "variable": "_bin_gen[3][4]_out"
-          }
-        ],
-        "constant": 0.0
-      },
-      "set": {
-        "type": "EqualTo",
-        "value": 0.0
+        "value": 0.1
       }
     },
     {
@@ -469,6 +281,22 @@
           {
             "coefficient": -1.0,
             "variable": "neg_demand_slack"
+          },
+          {
+            "coefficient": 1.0,
+            "variable": "storage_gen[1]"
+          },
+          {
+            "coefficient": 1.0,
+            "variable": "storage_gen[2]"
+          },
+          {
+            "coefficient": -1.0,
+            "variable": "storage_pump[1]"
+          },
+          {
+            "coefficient": -1.0,
+            "variable": "storage_pump[2]"
           }
         ],
         "constant": 0.0
@@ -484,12 +312,12 @@
         "type": "ScalarAffineFunction",
         "terms": [
           {
-            "coefficient": -1.0,
-            "variable": "startup_costs[1]"
-          },
-          {
             "coefficient": 22.79375,
             "variable": "up[1]"
+          },
+          {
+            "coefficient": -1.0,
+            "variable": "startup_costs[1]"
           }
         ],
         "constant": 0.0
@@ -505,12 +333,12 @@
         "type": "ScalarAffineFunction",
         "terms": [
           {
-            "coefficient": -1.0,
-            "variable": "startup_costs[2]"
-          },
-          {
             "coefficient": 22.21,
             "variable": "up[2]"
+          },
+          {
+            "coefficient": -1.0,
+            "variable": "startup_costs[2]"
           }
         ],
         "constant": 0.0
@@ -526,12 +354,12 @@
         "type": "ScalarAffineFunction",
         "terms": [
           {
-            "coefficient": -1.0,
-            "variable": "startup_costs[3]"
-          },
-          {
             "coefficient": 21.46125,
             "variable": "up[3]"
+          },
+          {
+            "coefficient": -1.0,
+            "variable": "startup_costs[3]"
           }
         ],
         "constant": 0.0
@@ -547,12 +375,12 @@
         "type": "ScalarAffineFunction",
         "terms": [
           {
-            "coefficient": -1.0,
-            "variable": "shutdown_costs[1]"
-          },
-          {
             "coefficient": 18.0,
             "variable": "down[1]"
+          },
+          {
+            "coefficient": -1.0,
+            "variable": "shutdown_costs[1]"
           }
         ],
         "constant": 0.0
@@ -568,12 +396,12 @@
         "type": "ScalarAffineFunction",
         "terms": [
           {
-            "coefficient": -1.0,
-            "variable": "shutdown_costs[2]"
-          },
-          {
             "coefficient": 17.0,
             "variable": "down[2]"
+          },
+          {
+            "coefficient": -1.0,
+            "variable": "shutdown_costs[2]"
           }
         ],
         "constant": 0.0
@@ -589,12 +417,12 @@
         "type": "ScalarAffineFunction",
         "terms": [
           {
-            "coefficient": -1.0,
-            "variable": "shutdown_costs[3]"
-          },
-          {
             "coefficient": 17.0,
             "variable": "down[3]"
+          },
+          {
+            "coefficient": -1.0,
+            "variable": "shutdown_costs[3]"
           }
         ],
         "constant": 0.0
@@ -1004,12 +832,12 @@
             "variable": "commit[1]_in"
           },
           {
-            "coefficient": 1.0,
-            "variable": "gen[1]_out"
-          },
-          {
             "coefficient": -1.0,
             "variable": "gen[1]_in"
+          },
+          {
+            "coefficient": 1.0,
+            "variable": "gen[1]_out"
           }
         ],
         "constant": 0.0
@@ -1029,12 +857,12 @@
             "variable": "commit[2]_in"
           },
           {
-            "coefficient": 1.0,
-            "variable": "gen[2]_out"
-          },
-          {
             "coefficient": -1.0,
             "variable": "gen[2]_in"
+          },
+          {
+            "coefficient": 1.0,
+            "variable": "gen[2]_out"
           }
         ],
         "constant": 0.0
@@ -1054,12 +882,12 @@
             "variable": "commit[3]_in"
           },
           {
-            "coefficient": 1.0,
-            "variable": "gen[3]_out"
-          },
-          {
             "coefficient": -1.0,
             "variable": "gen[3]_in"
+          },
+          {
+            "coefficient": 1.0,
+            "variable": "gen[3]_out"
           }
         ],
         "constant": 0.0
@@ -1075,16 +903,16 @@
         "type": "ScalarAffineFunction",
         "terms": [
           {
+            "coefficient": 1.0,
+            "variable": "gen[1]_in"
+          },
+          {
             "coefficient": -0.010000000000000009,
             "variable": "commit[1]_out"
           },
           {
             "coefficient": -1.0,
             "variable": "gen[1]_out"
-          },
-          {
-            "coefficient": 1.0,
-            "variable": "gen[1]_in"
           }
         ],
         "constant": 0.0
@@ -1100,16 +928,16 @@
         "type": "ScalarAffineFunction",
         "terms": [
           {
+            "coefficient": 1.0,
+            "variable": "gen[2]_in"
+          },
+          {
             "coefficient": 0.010000000000000009,
             "variable": "commit[2]_out"
           },
           {
             "coefficient": -1.0,
             "variable": "gen[2]_out"
-          },
-          {
-            "coefficient": 1.0,
-            "variable": "gen[2]_in"
           }
         ],
         "constant": 0.0
@@ -1125,16 +953,16 @@
         "type": "ScalarAffineFunction",
         "terms": [
           {
+            "coefficient": 1.0,
+            "variable": "gen[3]_in"
+          },
+          {
             "coefficient": 0.26,
             "variable": "commit[3]_out"
           },
           {
             "coefficient": -1.0,
             "variable": "gen[3]_out"
-          },
-          {
-            "coefficient": 1.0,
-            "variable": "gen[3]_in"
           }
         ],
         "constant": 0.0
@@ -1145,18 +973,106 @@
       }
     },
     {
-      "name": "c1_1",
+      "name": "c1",
       "function": {
         "type": "SingleVariable",
         "variable": "commit[1]_in"
       },
       "set": {
-        "type": "GreaterThan",
-        "lower": 0.0
+        "type": "EqualTo",
+        "value": 0.3130750605326875
       }
     },
     {
-      "name": "c2_1",
+      "name": "c2",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "commit[2]_in"
+      },
+      "set": {
+        "type": "EqualTo",
+        "value": 1.0
+      }
+    },
+    {
+      "name": "c3",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "commit[3]_in"
+      },
+      "set": {
+        "type": "EqualTo",
+        "value": 0.7967346938775509
+      }
+    },
+    {
+      "name": "c4",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "gen[1]_in"
+      },
+      "set": {
+        "type": "EqualTo",
+        "value": 0.3694285714285713
+      }
+    },
+    {
+      "name": "c5",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "gen[2]_in"
+      },
+      "set": {
+        "type": "EqualTo",
+        "value": 1.19
+      }
+    },
+    {
+      "name": "c6",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "gen[3]_in"
+      },
+      "set": {
+        "type": "EqualTo",
+        "value": 0.8365714285714285
+      }
+    },
+    {
+      "name": "c7",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "storage_level[1]_out"
+      },
+      "set": {
+        "type": "EqualTo",
+        "value": 0.7
+      }
+    },
+    {
+      "name": "c8",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "storage_level[2]_in"
+      },
+      "set": {
+        "type": "EqualTo",
+        "value": 0.0
+      }
+    },
+    {
+      "name": "c9",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "storage_level[2]_out"
+      },
+      "set": {
+        "type": "EqualTo",
+        "value": 0.25
+      }
+    },
+    {
+      "name": "c10",
       "function": {
         "type": "SingleVariable",
         "variable": "commit[1]_out"
@@ -1167,18 +1083,7 @@
       }
     },
     {
-      "name": "c3_1",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "commit[2]_in"
-      },
-      "set": {
-        "type": "GreaterThan",
-        "lower": 0.0
-      }
-    },
-    {
-      "name": "c4_1",
+      "name": "c11",
       "function": {
         "type": "SingleVariable",
         "variable": "commit[2]_out"
@@ -1189,18 +1094,7 @@
       }
     },
     {
-      "name": "c5_1",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "commit[3]_in"
-      },
-      "set": {
-        "type": "GreaterThan",
-        "lower": 0.0
-      }
-    },
-    {
-      "name": "c6_1",
+      "name": "c12",
       "function": {
         "type": "SingleVariable",
         "variable": "commit[3]_out"
@@ -1211,7 +1105,7 @@
       }
     },
     {
-      "name": "c7",
+      "name": "c13",
       "function": {
         "type": "SingleVariable",
         "variable": "gen[1]_out"
@@ -1222,51 +1116,7 @@
       }
     },
     {
-      "name": "c8",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[1][1]_in"
-      },
-      "set": {
-        "type": "GreaterThan",
-        "lower": 0.0
-      }
-    },
-    {
-      "name": "c9",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[1][2]_in"
-      },
-      "set": {
-        "type": "GreaterThan",
-        "lower": 0.0
-      }
-    },
-    {
-      "name": "c10",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[1][3]_in"
-      },
-      "set": {
-        "type": "GreaterThan",
-        "lower": 0.0
-      }
-    },
-    {
-      "name": "c11",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[1][4]_in"
-      },
-      "set": {
-        "type": "GreaterThan",
-        "lower": 0.0
-      }
-    },
-    {
-      "name": "c12",
+      "name": "c14",
       "function": {
         "type": "SingleVariable",
         "variable": "gen[2]_out"
@@ -1277,51 +1127,7 @@
       }
     },
     {
-      "name": "c13",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[2][1]_in"
-      },
-      "set": {
-        "type": "GreaterThan",
-        "lower": 0.0
-      }
-    },
-    {
-      "name": "c14",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[2][2]_in"
-      },
-      "set": {
-        "type": "GreaterThan",
-        "lower": 0.0
-      }
-    },
-    {
       "name": "c15",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[2][3]_in"
-      },
-      "set": {
-        "type": "GreaterThan",
-        "lower": 0.0
-      }
-    },
-    {
-      "name": "c16",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[2][4]_in"
-      },
-      "set": {
-        "type": "GreaterThan",
-        "lower": 0.0
-      }
-    },
-    {
-      "name": "c17",
       "function": {
         "type": "SingleVariable",
         "variable": "gen[3]_out"
@@ -1332,10 +1138,32 @@
       }
     },
     {
+      "name": "c16",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "up[1]"
+      },
+      "set": {
+        "type": "GreaterThan",
+        "lower": 0.0
+      }
+    },
+    {
+      "name": "c17",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "up[2]"
+      },
+      "set": {
+        "type": "GreaterThan",
+        "lower": 0.0
+      }
+    },
+    {
       "name": "c18",
       "function": {
         "type": "SingleVariable",
-        "variable": "_bin_gen[3][1]_in"
+        "variable": "up[3]"
       },
       "set": {
         "type": "GreaterThan",
@@ -1346,7 +1174,7 @@
       "name": "c19",
       "function": {
         "type": "SingleVariable",
-        "variable": "_bin_gen[3][2]_in"
+        "variable": "down[1]"
       },
       "set": {
         "type": "GreaterThan",
@@ -1357,7 +1185,7 @@
       "name": "c20",
       "function": {
         "type": "SingleVariable",
-        "variable": "_bin_gen[3][3]_in"
+        "variable": "down[2]"
       },
       "set": {
         "type": "GreaterThan",
@@ -1368,7 +1196,7 @@
       "name": "c21",
       "function": {
         "type": "SingleVariable",
-        "variable": "_bin_gen[3][4]_in"
+        "variable": "down[3]"
       },
       "set": {
         "type": "GreaterThan",
@@ -1533,7 +1361,7 @@
       "name": "c36",
       "function": {
         "type": "SingleVariable",
-        "variable": "x36"
+        "variable": "storage_gen[1]"
       },
       "set": {
         "type": "GreaterThan",
@@ -1541,109 +1369,54 @@
       }
     },
     {
-      "name": "c1_2",
+      "name": "c37",
       "function": {
         "type": "SingleVariable",
-        "variable": "commit[1]_in"
+        "variable": "storage_gen[2]"
       },
       "set": {
-        "type": "LessThan",
-        "upper": 1.0
+        "type": "GreaterThan",
+        "lower": 0.0
       }
     },
     {
-      "name": "c2_2",
+      "name": "c38",
       "function": {
         "type": "SingleVariable",
-        "variable": "commit[1]_out"
+        "variable": "storage_pump[1]"
       },
       "set": {
-        "type": "LessThan",
-        "upper": 1.0
+        "type": "GreaterThan",
+        "lower": 0.0
       }
     },
     {
-      "name": "c3_2",
+      "name": "c39",
       "function": {
         "type": "SingleVariable",
-        "variable": "commit[2]_in"
+        "variable": "storage_pump[2]"
       },
       "set": {
-        "type": "LessThan",
-        "upper": 1.0
+        "type": "GreaterThan",
+        "lower": 0.0
       }
     },
     {
-      "name": "c4_2",
+      "name": "c40",
       "function": {
         "type": "SingleVariable",
-        "variable": "commit[2]_out"
+        "variable": "x40"
       },
       "set": {
-        "type": "LessThan",
-        "upper": 1.0
-      }
-    },
-    {
-      "name": "c5_2",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "commit[3]_in"
-      },
-      "set": {
-        "type": "LessThan",
-        "upper": 1.0
-      }
-    },
-    {
-      "name": "c6_2",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "commit[3]_out"
-      },
-      "set": {
-        "type": "LessThan",
-        "upper": 1.0
-      }
-    },
-    {
-      "name": "c7_1",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "gen[1]_out"
-      },
-      "set": {
-        "type": "LessThan",
-        "upper": 1.18
-      }
-    },
-    {
-      "name": "c8_1",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[1][1]_in"
-      },
-      "set": {
-        "type": "LessThan",
-        "upper": 1.0
-      }
-    },
-    {
-      "name": "c9_1",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[1][2]_in"
-      },
-      "set": {
-        "type": "LessThan",
-        "upper": 1.0
+        "type": "GreaterThan",
+        "lower": 0.0
       }
     },
     {
       "name": "c10_1",
       "function": {
         "type": "SingleVariable",
-        "variable": "_bin_gen[1][3]_in"
+        "variable": "commit[1]_out"
       },
       "set": {
         "type": "LessThan",
@@ -1654,7 +1427,7 @@
       "name": "c11_1",
       "function": {
         "type": "SingleVariable",
-        "variable": "_bin_gen[1][4]_in"
+        "variable": "commit[2]_out"
       },
       "set": {
         "type": "LessThan",
@@ -1665,6 +1438,28 @@
       "name": "c12_1",
       "function": {
         "type": "SingleVariable",
+        "variable": "commit[3]_out"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 1.0
+      }
+    },
+    {
+      "name": "c13_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "gen[1]_out"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 1.18
+      }
+    },
+    {
+      "name": "c14_1",
+      "function": {
+        "type": "SingleVariable",
         "variable": "gen[2]_out"
       },
       "set": {
@@ -1673,51 +1468,7 @@
       }
     },
     {
-      "name": "c13_1",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[2][1]_in"
-      },
-      "set": {
-        "type": "LessThan",
-        "upper": 1.0
-      }
-    },
-    {
-      "name": "c14_1",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[2][2]_in"
-      },
-      "set": {
-        "type": "LessThan",
-        "upper": 1.0
-      }
-    },
-    {
       "name": "c15_1",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[2][3]_in"
-      },
-      "set": {
-        "type": "LessThan",
-        "upper": 1.0
-      }
-    },
-    {
-      "name": "c16_1",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[2][4]_in"
-      },
-      "set": {
-        "type": "LessThan",
-        "upper": 1.0
-      }
-    },
-    {
-      "name": "c17_1",
       "function": {
         "type": "SingleVariable",
         "variable": "gen[3]_out"
@@ -1728,10 +1479,32 @@
       }
     },
     {
+      "name": "c16_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "up[1]"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 1.0
+      }
+    },
+    {
+      "name": "c17_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "up[2]"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 1.0
+      }
+    },
+    {
       "name": "c18_1",
       "function": {
         "type": "SingleVariable",
-        "variable": "_bin_gen[3][1]_in"
+        "variable": "up[3]"
       },
       "set": {
         "type": "LessThan",
@@ -1742,7 +1515,7 @@
       "name": "c19_1",
       "function": {
         "type": "SingleVariable",
-        "variable": "_bin_gen[3][2]_in"
+        "variable": "down[1]"
       },
       "set": {
         "type": "LessThan",
@@ -1753,7 +1526,7 @@
       "name": "c20_1",
       "function": {
         "type": "SingleVariable",
-        "variable": "_bin_gen[3][3]_in"
+        "variable": "down[2]"
       },
       "set": {
         "type": "LessThan",
@@ -1764,7 +1537,7 @@
       "name": "c21_1",
       "function": {
         "type": "SingleVariable",
-        "variable": "_bin_gen[3][4]_in"
+        "variable": "down[3]"
       },
       "set": {
         "type": "LessThan",
@@ -1775,221 +1548,55 @@
       "name": "c36_1",
       "function": {
         "type": "SingleVariable",
-        "variable": "x36"
+        "variable": "storage_gen[1]"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 0.45
+      }
+    },
+    {
+      "name": "c37_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "storage_gen[2]"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 0.35
+      }
+    },
+    {
+      "name": "c38_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "storage_pump[1]"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 0.4
+      }
+    },
+    {
+      "name": "c39_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "storage_pump[2]"
+      },
+      "set": {
+        "type": "LessThan",
+        "upper": 0.3
+      }
+    },
+    {
+      "name": "c40_1",
+      "function": {
+        "type": "SingleVariable",
+        "variable": "x40"
       },
       "set": {
         "type": "LessThan",
         "upper": 0.0
-      }
-    },
-    {
-      "name": "c2_3",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "commit[1]_out"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c4_3",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "commit[2]_out"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c6_3",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "commit[3]_out"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c37",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[1][1]_out"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c38",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[1][2]_out"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c39",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[1][3]_out"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c40",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[1][4]_out"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c41",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[2][1]_out"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c42",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[2][2]_out"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c43",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[2][3]_out"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c44",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[2][4]_out"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c45",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[3][1]_out"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c46",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[3][2]_out"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c47",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[3][3]_out"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c48",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "_bin_gen[3][4]_out"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c49",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "up[1]"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c50",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "up[2]"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c51",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "up[3]"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c52",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "down[1]"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c53",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "down[2]"
-      },
-      "set": {
-        "type": "ZeroOne"
-      }
-    },
-    {
-      "name": "c54",
-      "function": {
-        "type": "SingleVariable",
-        "variable": "down[3]"
-      },
-      "set": {
-        "type": "ZeroOne"
       }
     }
   ]

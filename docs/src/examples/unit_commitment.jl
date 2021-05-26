@@ -13,26 +13,45 @@ struct Generator
     ramp_dw::Float64
 end
 
+struct Storage
+    level_max::Float64
+    level_ini::Float64
+    level_end::Float64
+    gen_max::Float64
+    pump_max::Float64
+    gen_eff::Float64
+    pump_eff::Float64
+end
+
+
 function unit_commitment_model(integrality_handler, iteration_limit, time_limit, solver, binaryPrecision)
+
+    num_of_generators = 3
+    num_of_storages = 2
+    num_of_stages = 3
 
     generators = [
         Generator(0, 0.0, 1.18, 0.32, 48.9, 0.0, 182.35, 18.0, 0.42, 0.33),
         Generator(1, 1.06, 1.19, 0.37, 52.1, 0.0, 177.68, 17.0, 0.31, 0.36),
         Generator(0, 0.0, 1.05, 0.48, 42.8, 0.0, 171.69, 17.0, 0.21, 0.22),
-        #Generator(0, 0.0, 1.13, 0.48, 54.0, 0.0, 171.60, 17.0, 0.28, 0.27),
-        #Generator(0, 0.0, 1.02, 0.47, 49.4, 0.0, 168.04, 17.0, 0.22, 0.275),
-        #Generator(1, 0.72, 1.9, 0.5, 64.1, 0.0, 289.59, 28.0, 0.52, 0.62),
-        #Generator(0, 0.0, 2.08, 0.62, 60.3, 0.0, 286.89, 28.0, 0.67, 0.5),
-        #Generator(1, 0.55, 2.11, 0.55, 66.1, 0.0, 329.89, 33.0, 0.64, 0.69),
-        #Generator(1, 2.2, 2.82, 0.85, 61.6, 0.0, 486.81, 49.0, 0.9, 0.79),
-        #Generator(0, 0.0, 3.23, 0.84, 54.9, 0.0, 503.34, 50.0, 1.01, 1.00),
+        Generator(0, 0.0, 1.13, 0.48, 54.0, 0.0, 171.60, 17.0, 0.28, 0.27),
+        Generator(0, 0.0, 1.02, 0.47, 49.4, 0.0, 168.04, 17.0, 0.22, 0.275),
+        Generator(1, 0.72, 1.9, 0.5, 64.1, 0.0, 289.59, 28.0, 0.52, 0.62),
+        Generator(0, 0.0, 2.08, 0.62, 60.3, 0.0, 286.89, 28.0, 0.67, 0.5),
+        Generator(1, 0.55, 2.11, 0.55, 66.1, 0.0, 329.89, 33.0, 0.64, 0.69),
+        Generator(1, 2.2, 2.82, 0.85, 61.6, 0.0, 486.81, 49.0, 0.9, 0.79),
+        Generator(0, 0.0, 3.23, 0.84, 54.9, 0.0, 503.34, 50.0, 1.01, 1.00),
     ]
-
-    num_of_generators = size(generators,1)
-    num_of_stages = 3
 
     demand_penalty = 5e2
     demand = [3.06 2.91 2.71 2.7 2.73 2.91 3.38 4.01 4.6 4.78 4.81 4.84 4.89 4.44 4.57 4.6 4.58 4.47 4.32 4.36 4.5 4.27 3.93 3.61 3.43 3.02 2.9 2.54 2.73 3.01 3.45 3.89 4.5 4.76 4.9 5.04]
+
+    storages = [
+        Storage(1.2, 0.5, 0.7, 0.45, 0.4, 0.9, 0.85),
+        Storage(0.8, 0.3, 0.25, 0.35, 0.3, 0.92, 0.87),
+    ]
+
+    inflow = [0.2 0.3 0.4; 0.1 0.05 0.1]
 
     model = SDDP.LinearPolicyGraph(
         stages = num_of_stages,
@@ -86,8 +105,40 @@ function unit_commitment_model(integrality_handler, iteration_limit, time_limit,
         JuMP.@constraint(subproblem, startup[i=1:num_of_generators], up[i] >= commit[i].out - commit[i].in)
         JuMP.@constraint(subproblem, shutdown[i=1:num_of_generators], down[i] >= commit[i].in - commit[i].out)
 
+        # additional storage state
+        JuMP.@variable(
+            subproblem,
+            0.0 <= storage_level[j = 1:num_of_storages] <= storages[j].level_max,
+            SDDP.State,
+            initial_value = storages[j].level_ini,
+            epsilon=binaryPrecision
+        )
+
+        # additional storage generation
+        JuMP.@variable(
+            subproblem,
+            0.0 <= storage_gen[j = 1:num_of_storages] <= storages[j].gen_max,
+        )
+
+        # additional storage pumping
+        JuMP.@variable(
+            subproblem,
+            0.0 <= storage_pump[j = 1:num_of_storages] <= storages[j].pump_max,
+        )
+
+        # additional storage level balance
+        JuMP.@constraint(
+            subproblem,
+            level_balance[j=1:num_of_storages], storage_level[j].out == storage_level[j].in + storage_pump[j] * storages[j].pump_eff - storage_gen[j] / storages[j].gen_eff + inflow[j,stage]
+        )
+
+        # additional storage end level
+        if stage == num_of_stages
+            JuMP.@constraint(subproblem, storage_end[j=1:num_of_storages], storage_level[j].out >= storages[j].level_end)
+        end
+
         # load balance
-        JuMP.@constraint(subproblem, load, sum(gen[i].out for i in 1:num_of_generators) + demand_slack - neg_demand_slack == demand[stage] )
+        JuMP.@constraint(subproblem, load, sum(gen[i].out for i in 1:num_of_generators) + demand_slack - neg_demand_slack + sum(storage_gen[j] - storage_pump[j] for j in 1:num_of_storages) == demand[stage] )
 
         # costs
         JuMP.@constraint(subproblem, startupcost[i=1:num_of_generators], num_of_stages/24 * generators[i].su_cost * up[i] == startup_costs[i])
@@ -145,6 +196,6 @@ bundleParams = SDDP.BundleParams(bundle_alpha, bundle_factor, level_factor)
 algoParams = SDDP.AlgoParams(sol_method, status_regime, bound_regime, init_regime, cut_type, lag_solver, bundleParams, binaryPrecision, numerical_focus)
 ################################################################################
 
-for integrality_handler in [SDDP.SDDiP_bin(algoParams=algoParams, rtol=lag_rtol, atol=lag_atol, iteration_limit=iteration_limit_lag)]
+for integrality_handler in [SDDP.SDDiP_con(algoParams=algoParams, rtol=lag_rtol, atol=lag_atol, iteration_limit=iteration_limit_lag)]
     unit_commitment_model(integrality_handler, iteration_limit, time_limit, solver, binaryPrecision)
 end

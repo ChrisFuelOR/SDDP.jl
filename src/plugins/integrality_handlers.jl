@@ -763,9 +763,9 @@ function get_dual_variables(
         # Create Benders cut by solving LP relaxation
 
         TimerOutputs.@timeit SDDP_TIMER "dual_initialization" begin
-            init_results = -initialize_duals(node, :LP)
-            dual_vars = init_results.dual_vars
-            lag_obj = init_results.objective
+            init_results = initialize_duals(node, :LP)
+            dual_vars = -init_results.dual_vars
+            lag_obj = init_results.obj_value
         end
         lag_status = :B
 
@@ -775,8 +775,8 @@ function get_dual_variables(
 
         # Initialize dual variables by solving LP dual
         TimerOutputs.@timeit SDDP_TIMER "dual_initialization" begin
-            init_results = -initialize_duals(node, :LP)
-            dual_vars = init_results.dual_vars
+            init_results = initialize_duals(node, :LP)
+            dual_vars = -init_results.dual_vars
         end
 
         # solve lagrangian relaxed problem for these dual values
@@ -787,8 +787,8 @@ function get_dual_variables(
     elseif integrality_handler.algoParams.cut_type == :L
         ########################################################################
         TimerOutputs.@timeit SDDP_TIMER "dual_initialization" begin
-            init_results = -initialize_duals(node, integrality_handler.algoParams.init_regime)
-            dual_vars = init_results.dual_vars
+            init_results = initialize_duals(node, integrality_handler.algoParams.init_regime)
+            dual_vars = -init_results.dual_vars
         end
 
         try
@@ -1098,11 +1098,12 @@ function initialize_duals(
     number_of_states = length(node.states)
     dual_vars_initial = zeros(number_of_states)
 
+    objective = Inf
+
     # DUAL REGIME I: USE ZEROS
     ############################################################################
     if dual_regime == :zeros
         # Do nothing, since zeros are already defined
-        objective = Inf
 
     # DUAL REGIME II: USE LP RELAXATION
     ############################################################################
@@ -1146,7 +1147,7 @@ function initialize_duals(
 
     end
 
-    return (dual_vars = dual_vars_initial, objective = objective)
+    return (dual_vars = dual_vars_initial, obj_value = objective)
 end
 
 

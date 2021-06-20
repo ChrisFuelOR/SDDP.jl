@@ -763,9 +763,10 @@ function get_dual_variables(
         # Create Benders cut by solving LP relaxation
 
         TimerOutputs.@timeit SDDP_TIMER "dual_initialization" begin
-            dual_vars = -initialize_duals(node, :LP)
+            init_results = -initialize_duals(node, :LP)
+            dual_vars = init_results.dual_vars
+            lag_obj = init_results.objective
         end
-        lag_obj = JuMP.objective_value(node.subproblem)
         lag_status = :B
 
     elseif integrality_handler.algoParams.cut_type == :SB
@@ -774,7 +775,8 @@ function get_dual_variables(
 
         # Initialize dual variables by solving LP dual
         TimerOutputs.@timeit SDDP_TIMER "dual_initialization" begin
-            dual_vars = -initialize_duals(node, :LP)
+            init_results = -initialize_duals(node, :LP)
+            dual_vars = init_results.dual_vars
         end
 
         # solve lagrangian relaxed problem for these dual values
@@ -785,7 +787,8 @@ function get_dual_variables(
     elseif integrality_handler.algoParams.cut_type == :L
         ########################################################################
         TimerOutputs.@timeit SDDP_TIMER "dual_initialization" begin
-            dual_vars = -initialize_duals(node, integrality_handler.algoParams.init_regime)
+            init_results = -initialize_duals(node, integrality_handler.algoParams.init_regime)
+            dual_vars = init_results.dual_vars
         end
 
         try
@@ -1099,6 +1102,7 @@ function initialize_duals(
     ############################################################################
     if dual_regime == :zeros
         # Do nothing, since zeros are already defined
+        objective = Inf
 
     # DUAL REGIME II: USE LP RELAXATION
     ############################################################################
@@ -1108,6 +1112,7 @@ function initialize_duals(
 
         # Solve LP Relaxation
         JuMP.optimize!(subproblem)
+        objective = JuMP.objective_value(node.subproblem)
 
         # Get dual values (reduced costs) for states as initial solution
         for (i, name) in enumerate(keys(node.states))
@@ -1127,6 +1132,7 @@ function initialize_duals(
 
         # Solve original primal model in binary space
         JuMP.optimize!(subproblem)
+        objective = JuMP.objective_value(node.subproblem)
 
         # Get dual values (reduced costs) for binary states as initial solution
         for (i, name) in enumerate(keys(node.states))
@@ -1140,7 +1146,7 @@ function initialize_duals(
 
     end
 
-    return dual_vars_initial
+    return (dual_vars = dual_vars_initial, objective = objective)
 end
 
 

@@ -175,12 +175,12 @@ end
 # Parameter configuration
 ################################################################################
 iteration_limit = 50
-iteration_limit_lag = 10000
+iteration_limit_lag = 1000
 time_limit = 3600
 lag_atol = 1e-8
 lag_rtol = 1e-8
 sol_method = :kelley
-status_regime = :rigorous
+status_regime = :lax
 bound_regime = :value
 init_regime = :LP
 cut_type = :L

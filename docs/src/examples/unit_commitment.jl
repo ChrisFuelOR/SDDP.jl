@@ -176,7 +176,7 @@ end
 ################################################################################
 iteration_limit = 50
 iteration_limit_lag = 1000
-time_limit = 3600
+time_limit = 36000
 lag_atol = 1e-8
 lag_rtol = 1e-8
 sol_method = :kelley
@@ -189,7 +189,7 @@ lag_solver = "CPLEX"
 bundle_alpha = 0.5
 bundle_factor = 1.0
 level_factor = 0.2
-binaryPrecision = 0.01
+binaryPrecision = 0.1
 numerical_focus = :no
 
 bundleParams = SDDP.BundleParams(bundle_alpha, bundle_factor, level_factor)

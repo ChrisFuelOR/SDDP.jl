@@ -26,7 +26,7 @@ end
 
 function unit_commitment_model(integrality_handler, iteration_limit, time_limit, solver, binaryPrecision)
 
-    num_of_generators = 10
+    num_of_generators = 5
     num_of_storages = 2
     num_of_stages = 3
 
@@ -189,7 +189,7 @@ lag_solver = "CPLEX"
 bundle_alpha = 0.5
 bundle_factor = 1.0
 level_factor = 0.2
-binaryPrecision = 0.001
+binaryPrecision = 0.1
 numerical_focus = :no
 
 bundleParams = SDDP.BundleParams(bundle_alpha, bundle_factor, level_factor)

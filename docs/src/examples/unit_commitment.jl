@@ -190,7 +190,7 @@ bundle_alpha = 0.5
 bundle_factor = 1.0
 level_factor = 0.2
 binaryPrecision = 0.01
-numerical_focus = :no
+numerical_focus = :yes
 
 bundleParams = SDDP.BundleParams(bundle_alpha, bundle_factor, level_factor)
 algoParams = SDDP.AlgoParams(sol_method, status_regime, bound_regime, init_regime, cut_type, lag_solver, bundleParams, binaryPrecision, numerical_focus)

@@ -189,7 +189,7 @@ lag_solver = "CPLEX"
 bundle_alpha = 0.5
 bundle_factor = 1.0
 level_factor = 0.2
-binaryPrecision = 0.1
+binaryPrecision = 0.01
 numerical_focus = :no
 
 bundleParams = SDDP.BundleParams(bundle_alpha, bundle_factor, level_factor)
